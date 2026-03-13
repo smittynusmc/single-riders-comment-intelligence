@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardSummary, TopSignalSummary } from "@single-riders/shared-types";
 import { formatTitle } from "@/lib/utils/format";
 

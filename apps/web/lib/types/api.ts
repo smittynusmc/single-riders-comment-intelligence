@@ -1,1 +1,1 @@
-﻿export * from "@single-riders/shared-types";
+export * from "@single-riders/shared-types";

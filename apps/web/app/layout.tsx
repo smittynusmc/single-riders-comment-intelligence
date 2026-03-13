@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Sans, Space_Grotesk } from "next/font/google";
 
@@ -6,7 +6,11 @@ import { AppShell } from "@/components/layout/app-shell";
 
 import "./globals.css";
 
-const bodyFont = IBM_Plex_Sans({ subsets: ["latin"], variable: "--font-body" });
+const bodyFont = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["400", "500", "600", "700"],
+});
 const displayFont = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
 
 export const metadata: Metadata = {

@@ -1,4 +1,4 @@
-﻿import type { DashboardSummary, TopSignalSummary, TrendPoint } from "@single-riders/shared-types";
+import type { DashboardSummary, TopSignalSummary, TrendPoint } from "@single-riders/shared-types";
 
 import { apiFetch } from "@/lib/api/client";
 

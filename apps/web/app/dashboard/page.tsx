@@ -1,4 +1,4 @@
-﻿import { PageHeader } from "@/components/layout/page-header";
+import { PageHeader } from "@/components/layout/page-header";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { TopSignalsList } from "@/components/dashboard/top-signals-list";
 import { TrendChart } from "@/components/dashboard/trend-chart";

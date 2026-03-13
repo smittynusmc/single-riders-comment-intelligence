@@ -1,1 +1,1 @@
-﻿"""Background job helpers."""
+"""Background job helpers."""

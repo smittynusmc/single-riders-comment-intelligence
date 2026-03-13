@@ -1,5 +1,6 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
+from app.models.enums import ImportFormat
 from app.repositories.comments import CommentRepository
 from app.repositories.ingestion_runs import IngestionRunRepository
 from app.services.import_service import ImportService
@@ -21,6 +22,7 @@ def test_csv_import_persists_raw_comments_and_duplicates(db_session):
     assert run.imported_rows == 2
     assert run.duplicate_rows == 1
     assert run.failed_rows == 0
+    assert run.import_format == ImportFormat.CSV
 
     raw_comments = CommentRepository(db_session).pending_raw_comments_for_run(run.id)
     assert len(raw_comments) == 2

@@ -1,4 +1,4 @@
-﻿"""initial comment intelligence schema
+"""initial comment intelligence schema
 
 Revision ID: 0001_initial
 Revises:
@@ -27,11 +27,22 @@ source_platform = sa.Enum(
     name="sourceplatform",
 )
 ingestion_source_type = sa.Enum(
-    "csv",
+    "json_upload",
+    "csv_upload",
     "manual_paste",
     "third_party_export",
+    "research_api",
     "connector_placeholder",
     name="ingestionsourcetype",
+)
+import_format = sa.Enum(
+    "tiktok_json",
+    "csv",
+    "research_api_json",
+    "portability_json",
+    "manual_text",
+    "third_party_export",
+    name="importformat",
 )
 ingestion_status = sa.Enum("pending", "imported", "processing", "completed", "failed", name="ingestionstatus")
 normalization_status = sa.Enum("pending", "normalized", "skipped_duplicate", "failed", name="normalizationstatus")
@@ -78,6 +89,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     source_platform.create(bind, checkfirst=True)
     ingestion_source_type.create(bind, checkfirst=True)
+    import_format.create(bind, checkfirst=True)
     ingestion_status.create(bind, checkfirst=True)
     normalization_status.create(bind, checkfirst=True)
     classification_status.create(bind, checkfirst=True)
@@ -90,6 +102,7 @@ def upgrade() -> None:
         "ingestion_runs",
         sa.Column("source_type", ingestion_source_type, nullable=False),
         sa.Column("source_platform", source_platform, nullable=False),
+        sa.Column("import_format", import_format, nullable=False),
         sa.Column("source_label", sa.String(length=255), nullable=False),
         sa.Column("status", ingestion_status, nullable=False),
         sa.Column("total_rows", sa.Integer(), nullable=False, server_default="0"),
@@ -110,8 +123,9 @@ def upgrade() -> None:
         "raw_comments",
         sa.Column("ingestion_run_id", sa.Uuid(), nullable=False),
         sa.Column("source_platform", source_platform, nullable=False),
-        sa.Column("source_video_id", sa.String(length=255), nullable=False),
+        sa.Column("source_video_id", sa.String(length=255), nullable=True),
         sa.Column("source_comment_id", sa.String(length=255), nullable=False),
+        sa.Column("source_parent_comment_id", sa.String(length=255), nullable=True),
         sa.Column("author_handle", sa.String(length=255), nullable=True),
         sa.Column("comment_text", sa.Text(), nullable=False),
         sa.Column("comment_created_at", sa.DateTime(timezone=True), nullable=True),
@@ -119,7 +133,7 @@ def upgrade() -> None:
         sa.Column("reply_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("row_number", sa.Integer(), nullable=True),
         sa.Column("is_duplicate", sa.Boolean(), nullable=False, server_default=sa.false()),
-        sa.Column("payload", sa.JSON(), nullable=False),
+        sa.Column("raw_payload_json", sa.JSON(), nullable=False),
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
@@ -132,8 +146,9 @@ def upgrade() -> None:
         sa.Column("raw_comment_id", sa.Uuid(), nullable=False),
         sa.Column("ingestion_run_id", sa.Uuid(), nullable=False),
         sa.Column("source_platform", source_platform, nullable=False),
-        sa.Column("source_video_id", sa.String(length=255), nullable=False),
+        sa.Column("source_video_id", sa.String(length=255), nullable=True),
         sa.Column("source_comment_id", sa.String(length=255), nullable=False),
+        sa.Column("source_parent_comment_id", sa.String(length=255), nullable=True),
         sa.Column("author_handle", sa.String(length=255), nullable=True),
         sa.Column("original_text", sa.Text(), nullable=False),
         sa.Column("normalized_text", sa.Text(), nullable=False),
@@ -241,5 +256,6 @@ def downgrade() -> None:
     classification_status.drop(bind, checkfirst=True)
     normalization_status.drop(bind, checkfirst=True)
     ingestion_status.drop(bind, checkfirst=True)
+    import_format.drop(bind, checkfirst=True)
     ingestion_source_type.drop(bind, checkfirst=True)
     source_platform.drop(bind, checkfirst=True)

@@ -1,4 +1,4 @@
-﻿import { PageHeader } from "@/components/layout/page-header";
+import { PageHeader } from "@/components/layout/page-header";
 import { ClassificationTable } from "@/components/classifications/classification-table";
 import { getClassifications } from "@/lib/api/classifications";
 

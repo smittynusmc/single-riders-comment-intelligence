@@ -1,1 +1,1 @@
-﻿"""Single Riders comment intelligence backend package."""
+"""Single Riders comment intelligence backend package."""

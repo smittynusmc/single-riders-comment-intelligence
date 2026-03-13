@@ -1,5 +1,5 @@
-﻿import { PageHeader } from "@/components/layout/page-header";
-import { CsvUploadForm } from "@/components/imports/csv-upload-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { ImportUploadForm } from "@/components/imports/csv-upload-form";
 import { ImportHistoryTable } from "@/components/imports/import-history-table";
 import { getImports } from "@/lib/api/imports";
 
@@ -10,10 +10,10 @@ export default async function ImportsPage() {
     <div className="space-y-8">
       <PageHeader
         title="Imports"
-        description="Upload TikTok comment CSV exports, watch import outcomes, and confirm duplicate or failure counts before the worker pipeline classifies anything."
+        description="Preview TikTok JSON exports before import, or fall back to CSV for cleaned manual datasets."
       />
       <div className="grid gap-6 xl:grid-cols-[1fr,1.4fr]">
-        <CsvUploadForm />
+        <ImportUploadForm />
         <ImportHistoryTable runs={history.items} />
       </div>
     </div>

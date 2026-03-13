@@ -1,12 +1,12 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.enums import IngestionSourceType, IngestionStatus, SourcePlatform
+from app.models.enums import ImportFormat, IngestionSourceType, IngestionStatus, SourcePlatform
 from app.models.ingestion import IngestionRun
 
 
@@ -19,6 +19,7 @@ class IngestionRunRepository:
         *,
         source_type: IngestionSourceType,
         source_platform: SourcePlatform,
+        import_format: ImportFormat,
         source_label: str,
         run_metadata: dict | None = None,
         status: IngestionStatus = IngestionStatus.PENDING,
@@ -26,9 +27,10 @@ class IngestionRunRepository:
         run = IngestionRun(
             source_type=source_type,
             source_platform=source_platform,
+            import_format=import_format,
             source_label=source_label,
             status=status,
-            started_at=datetime.utcnow(),
+            started_at=datetime.now(UTC),
             run_metadata=run_metadata or {},
         )
         self.session.add(run)
@@ -61,7 +63,7 @@ class IngestionRunRepository:
         run.status = status
         run.error_message = error_message
         if status in {IngestionStatus.COMPLETED, IngestionStatus.FAILED}:
-            run.finished_at = datetime.utcnow()
+            run.finished_at = datetime.now(UTC)
         self.session.add(run)
         self.session.flush()
         return run

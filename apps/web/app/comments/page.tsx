@@ -1,4 +1,4 @@
-﻿import { CommentFilters } from "@/components/comments/comment-filters";
+import { CommentFilters } from "@/components/comments/comment-filters";
 import { CommentsTable } from "@/components/comments/comments-table";
 import { PageHeader } from "@/components/layout/page-header";
 import { getComments } from "@/lib/api/comments";
@@ -6,17 +6,19 @@ import { getComments } from "@/lib/api/comments";
 export default async function CommentsPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const resolvedSearchParams = (await searchParams) ?? {};
   const params = {
-    keyword: typeof searchParams.keyword === "string" ? searchParams.keyword : undefined,
-    source_video_id: typeof searchParams.source_video_id === "string" ? searchParams.source_video_id : undefined,
-    primary_category: typeof searchParams.primary_category === "string" ? searchParams.primary_category : undefined,
-    mvp_area: typeof searchParams.mvp_area === "string" ? searchParams.mvp_area : undefined,
-    sentiment: typeof searchParams.sentiment === "string" ? searchParams.sentiment : undefined,
-    needs_human_review: typeof searchParams.needs_human_review === "string" ? searchParams.needs_human_review === "true" : undefined,
-    date_from: typeof searchParams.date_from === "string" ? searchParams.date_from : undefined,
-    date_to: typeof searchParams.date_to === "string" ? searchParams.date_to : undefined,
+    keyword: typeof resolvedSearchParams.keyword === "string" ? resolvedSearchParams.keyword : undefined,
+    source_video_id: typeof resolvedSearchParams.source_video_id === "string" ? resolvedSearchParams.source_video_id : undefined,
+    primary_category: typeof resolvedSearchParams.primary_category === "string" ? resolvedSearchParams.primary_category : undefined,
+    mvp_area: typeof resolvedSearchParams.mvp_area === "string" ? resolvedSearchParams.mvp_area : undefined,
+    sentiment: typeof resolvedSearchParams.sentiment === "string" ? resolvedSearchParams.sentiment : undefined,
+    needs_human_review:
+      typeof resolvedSearchParams.needs_human_review === "string" ? resolvedSearchParams.needs_human_review === "true" : undefined,
+    date_from: typeof resolvedSearchParams.date_from === "string" ? resolvedSearchParams.date_from : undefined,
+    date_to: typeof resolvedSearchParams.date_to === "string" ? resolvedSearchParams.date_to : undefined,
     limit: 100,
   };
 

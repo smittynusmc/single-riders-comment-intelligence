@@ -1,4 +1,4 @@
-﻿import type { ClassificationReviewItem, CommentClassification, PaginatedResponse } from "@single-riders/shared-types";
+import type { ClassificationReviewItem, CommentClassification, PaginatedResponse } from "@single-riders/shared-types";
 
 import { apiFetch, buildQuery } from "@/lib/api/client";
 

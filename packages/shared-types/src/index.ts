@@ -1,4 +1,4 @@
-﻿export type SourcePlatform =
+export type SourcePlatform =
   | "tiktok"
   | "instagram"
   | "discord"
@@ -6,6 +6,22 @@
   | "manual"
   | "generic_social"
   | "unknown";
+
+export type IngestionSourceType =
+  | "json_upload"
+  | "csv_upload"
+  | "manual_paste"
+  | "third_party_export"
+  | "research_api"
+  | "connector_placeholder";
+
+export type ImportFormat =
+  | "tiktok_json"
+  | "csv"
+  | "research_api_json"
+  | "portability_json"
+  | "manual_text"
+  | "third_party_export";
 
 export type IngestionStatus = "pending" | "imported" | "processing" | "completed" | "failed";
 export type ClassificationStatus = "pending" | "classified" | "needs_review" | "approved" | "false_positive";
@@ -49,8 +65,9 @@ export interface PaginatedResponse<T> {
 
 export interface IngestionRun {
   id: string;
-  source_type: string;
+  source_type: IngestionSourceType;
   source_platform: SourcePlatform;
+  import_format: ImportFormat;
   source_label: string;
   status: IngestionStatus;
   total_rows: number;
@@ -69,8 +86,9 @@ export interface RawComment {
   id: string;
   ingestion_run_id: string;
   source_platform: SourcePlatform;
-  source_video_id: string;
+  source_video_id: string | null;
   source_comment_id: string;
+  source_parent_comment_id: string | null;
   author_handle: string | null;
   comment_text: string;
   comment_created_at: string | null;
@@ -78,6 +96,7 @@ export interface RawComment {
   reply_count: number;
   row_number: number | null;
   is_duplicate: boolean;
+  raw_payload_json: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -87,8 +106,9 @@ export interface NormalizedComment {
   raw_comment_id: string;
   ingestion_run_id: string;
   source_platform: SourcePlatform;
-  source_video_id: string;
+  source_video_id: string | null;
   source_comment_id: string;
+  source_parent_comment_id: string | null;
   author_handle: string | null;
   original_text: string;
   normalized_text: string;
@@ -136,7 +156,7 @@ export interface CommentItem {
 
 export interface ClassificationReviewContext {
   id: string;
-  source_video_id: string;
+  source_video_id: string | null;
   source_comment_id: string;
   author_handle: string | null;
   original_text: string;
@@ -220,4 +240,22 @@ export interface TopSignalSummary {
   mvp_area: string;
   evidence_count: number;
   priority_score: number;
+}
+
+export interface ImportPreviewSample {
+  source_comment_id: string;
+  source_video_id: string | null;
+  author_handle: string | null;
+  comment_text: string;
+  comment_created_at: string | null;
+}
+
+export interface ImportPreview {
+  detected_format: ImportFormat;
+  detected_shape: string | null;
+  comment_count: number;
+  sample_fields: string[];
+  missing_fields: string[];
+  parse_warnings: string[];
+  sample_comments: ImportPreviewSample[];
 }

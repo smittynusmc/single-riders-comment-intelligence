@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from app.models.base import Base
 from app.models.classification import CommentClassification

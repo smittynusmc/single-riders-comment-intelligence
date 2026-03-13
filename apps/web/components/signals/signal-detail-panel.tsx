@@ -1,4 +1,4 @@
-﻿import type { Signal } from "@single-riders/shared-types";
+import type { Signal } from "@single-riders/shared-types";
 
 export function SignalDetailPanel({ signal }: { signal: Signal }) {
   return (

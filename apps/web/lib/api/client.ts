@@ -1,4 +1,4 @@
-﻿const fallbackApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8000";
+const fallbackApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8000";
 
 function buildUrl(path: string) {
   return `${fallbackApiBaseUrl}${path}`;

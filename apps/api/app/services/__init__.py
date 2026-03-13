@@ -1,4 +1,4 @@
-﻿from app.services.aggregation import SignalAggregationService
+from app.services.aggregation import SignalAggregationService
 from app.services.classification import ClassificationResultParser, CommentClassificationService
 from app.services.dashboard import DashboardService
 from app.services.exports import ExportService

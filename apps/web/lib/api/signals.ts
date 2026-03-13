@@ -1,4 +1,4 @@
-﻿import type { PaginatedResponse, Signal, SignalDetail, SignalExportResponse } from "@single-riders/shared-types";
+import type { PaginatedResponse, Signal, SignalDetail, SignalExportResponse } from "@single-riders/shared-types";
 
 import { apiFetch, buildQuery } from "@/lib/api/client";
 

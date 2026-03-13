@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from enum import Enum
 
@@ -14,10 +14,21 @@ class SourcePlatform(str, Enum):
 
 
 class IngestionSourceType(str, Enum):
-    CSV = "csv"
+    JSON_UPLOAD = "json_upload"
+    CSV_UPLOAD = "csv_upload"
     MANUAL_PASTE = "manual_paste"
     THIRD_PARTY_EXPORT = "third_party_export"
+    RESEARCH_API = "research_api"
     CONNECTOR_PLACEHOLDER = "connector_placeholder"
+
+
+class ImportFormat(str, Enum):
+    TIKTOK_JSON = "tiktok_json"
+    CSV = "csv"
+    RESEARCH_API_JSON = "research_api_json"
+    PORTABILITY_JSON = "portability_json"
+    MANUAL_TEXT = "manual_text"
+    THIRD_PARTY_EXPORT = "third_party_export"
 
 
 class IngestionStatus(str, Enum):

@@ -1,4 +1,4 @@
-﻿import type { IngestionRun } from "@single-riders/shared-types";
+import type { IngestionRun } from "@single-riders/shared-types";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ export function ImportHistoryTable({ runs }: { runs: IngestionRun[] }) {
             <TableHead>
               <tr>
                 <TableHeaderCell>Source</TableHeaderCell>
+                <TableHeaderCell>Format</TableHeaderCell>
                 <TableHeaderCell>Status</TableHeaderCell>
                 <TableHeaderCell>Rows</TableHeaderCell>
                 <TableHeaderCell>Duplicates</TableHeaderCell>
@@ -31,6 +32,7 @@ export function ImportHistoryTable({ runs }: { runs: IngestionRun[] }) {
               {runs.map((run) => (
                 <TableRow key={run.id}>
                   <TableCell>{run.source_label}</TableCell>
+                  <TableCell>{run.import_format.replaceAll("_", " ")}</TableCell>
                   <TableCell>
                     <Badge variant={run.status === "completed" ? "success" : run.status === "failed" ? "danger" : "warning"}>
                       {run.status}

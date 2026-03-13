@@ -1,4 +1,4 @@
-﻿# Architecture
+# Architecture
 
 ## Purpose
 
@@ -14,7 +14,7 @@ The system turns imported social comments into grouped MVP signals for Single Ri
 ## Core pipeline
 
 ```text
-CSV export / manual paste / future approved connector
+TikTok JSON export / portability JSON / research response JSON / CSV fallback
   -> ingestion adapter
   -> ingestion_runs + raw_comments
   -> normalization service
@@ -29,11 +29,13 @@ CSV export / manual paste / future approved connector
 
 ## Why adapters first
 
-TikTok access for comment retrieval is not stable or generally available through public OAuth-based APIs. The ingestion layer is therefore built around neutral adapters rather than platform-specific logic inside services.
+TikTok access for comment retrieval is not stable or generally available through public OAuth-based APIs, so export-based ingestion is the safer default. The ingestion layer is therefore built around neutral adapters rather than platform-specific logic inside services.
 
 Implemented now:
 
+- `TikTokJsonImportAdapter`
 - `CsvImportAdapter`
+- `TikTokResearchAdapter` for manually supplied approved research response JSON
 
 Included as placeholders for future work:
 
@@ -41,15 +43,37 @@ Included as placeholders for future work:
 - `ThirdPartyExportPlaceholderAdapter`
 - `TikTokConnectorPlaceholderAdapter`
 
+## Canonical comment contract
+
+All adapters emit the same internal comment object before anything is persisted or classified.
+
+```json
+{
+  "platform": "tiktok",
+  "source_type": "json_export",
+  "source_video_id": "string|null",
+  "source_comment_id": "string",
+  "source_parent_comment_id": "string|null",
+  "author_handle": "string|null",
+  "comment_text": "string",
+  "comment_created_at": "ISO-8601|null",
+  "like_count": 0,
+  "reply_count": 0,
+  "raw_payload": {}
+}
+```
+
+This keeps the rest of the system independent of whether the original source was a TikTok export, a research response JSON file, or a CSV convenience import.
+
 ## Persistence model
 
 ### `ingestion_runs`
 
-Tracks import source, counts, status, and failure metadata.
+Tracks adapter source, import format, counts, status, detected shape, warnings, and failure metadata.
 
 ### `raw_comments`
 
-Stores untouched import rows for auditing and replay.
+Stores untouched imported comments and the original `raw_payload_json` for auditing and replay.
 
 ### `normalized_comments`
 
@@ -69,7 +93,7 @@ Stores the evidence mapping between grouped signals and comment classifications.
 
 ## Service boundaries
 
-- `ImportService`: adapter orchestration and raw persistence
+- `ImportService`: adapter orchestration, preview summaries, and raw persistence
 - `NormalizationService`: canonical text cleanup and rule tagging
 - `KeywordRuleService`: deterministic pre-pass for obvious keywords
 - `CommentClassificationService`: structured classification with provider abstraction

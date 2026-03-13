@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import re
 from datetime import datetime
@@ -18,8 +18,9 @@ class NormalizedCommentData(BaseModel):
     raw_comment_id: UUID
     ingestion_run_id: UUID
     source_platform: SourcePlatform
-    source_video_id: str
+    source_video_id: str | None = None
     source_comment_id: str
+    source_parent_comment_id: str | None = None
     author_handle: str | None = None
     original_text: str
     normalized_text: str
@@ -48,6 +49,7 @@ class NormalizationService:
             source_platform=raw_comment.source_platform,
             source_video_id=raw_comment.source_video_id,
             source_comment_id=raw_comment.source_comment_id,
+            source_parent_comment_id=raw_comment.source_parent_comment_id,
             author_handle=raw_comment.author_handle,
             original_text=raw_comment.comment_text,
             normalized_text=normalized_text,
@@ -76,6 +78,7 @@ class NormalizationService:
                 source_platform=payload.source_platform,
                 source_video_id=payload.source_video_id,
                 source_comment_id=payload.source_comment_id,
+                source_parent_comment_id=payload.source_parent_comment_id,
                 author_handle=payload.author_handle,
                 original_text=payload.original_text,
                 normalized_text=payload.normalized_text,

@@ -1,6 +1,6 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from app.models.comment import RawComment
 from app.models.enums import SourcePlatform
@@ -13,6 +13,7 @@ def test_normalization_collapses_whitespace_and_applies_rules(db_session):
     repository = CommentRepository(db_session)
     service = NormalizationService(repository, KeywordRuleService())
     raw_comment = RawComment(
+        id=uuid4(),
         ingestion_run_id=UUID("00000000-0000-0000-0000-000000000001"),
         source_platform=SourcePlatform.TIKTOK,
         source_video_id="video-1",
@@ -21,7 +22,7 @@ def test_normalization_collapses_whitespace_and_applies_rules(db_session):
         comment_text="Need   a SAME DAY   meetup   option",
         like_count=0,
         reply_count=0,
-        payload={},
+        raw_payload_json={},
     )
 
     payload = service.build_payload(raw_comment)

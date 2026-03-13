@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { CommentItem } from "@single-riders/shared-types";
 

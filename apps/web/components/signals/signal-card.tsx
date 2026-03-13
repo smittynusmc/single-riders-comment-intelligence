@@ -1,4 +1,4 @@
-﻿import type { Signal } from "@single-riders/shared-types";
+import type { Signal } from "@single-riders/shared-types";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

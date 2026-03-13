@@ -1,9 +1,9 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from typing import Any
 
 from app.adapters.base import AdapterImportResult, BaseIngestionAdapter, ImportedCommentRecord
-from app.models.enums import IngestionSourceType, SourcePlatform
+from app.models.enums import ImportFormat, IngestionSourceType, SourcePlatform
 
 
 class TikTokConnectorPlaceholderAdapter(BaseIngestionAdapter):
@@ -14,6 +14,7 @@ class TikTokConnectorPlaceholderAdapter(BaseIngestionAdapter):
 
     source_type = IngestionSourceType.CONNECTOR_PLACEHOLDER
     source_platform = SourcePlatform.TIKTOK
+    import_format = ImportFormat.TIKTOK_JSON
 
     def fetch_comments(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         raise NotImplementedError("Live TikTok connectors are not implemented in phase 1.")

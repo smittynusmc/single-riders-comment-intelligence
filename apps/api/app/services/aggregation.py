@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import math
 import re
@@ -15,6 +15,10 @@ STOPWORDS = {
     "a", "an", "and", "be", "for", "i", "is", "it", "me", "my", "of", "on", "or", "so", "the", "this", "to", "we", "with", "you",
 }
 TOKEN_RE = re.compile(r"[a-z0-9]+")
+
+
+def comment_timestamp(item: CommentClassification) -> datetime:
+    return item.normalized_comment.comment_created_at or item.normalized_comment.created_at or datetime.now(UTC)
 
 
 class SignalAggregationService:
@@ -65,14 +69,8 @@ class SignalAggregationService:
                 status=existing.status if existing else SignalStatus.ACTIVE,
                 evidence_count=len(group),
                 priority_score=self._build_priority_score(group),
-                first_seen_at=min(
-                    (item.normalized_comment.comment_created_at or item.normalized_comment.created_at for item in group),
-                    default=datetime.now(UTC),
-                ),
-                last_seen_at=max(
-                    (item.normalized_comment.comment_created_at or item.normalized_comment.created_at for item in group),
-                    default=datetime.now(UTC),
-                ),
+                first_seen_at=min((comment_timestamp(item) for item in group), default=datetime.now(UTC)),
+                last_seen_at=max((comment_timestamp(item) for item in group), default=datetime.now(UTC)),
                 sample_comments=sample_comments,
                 suggested_backlog_action=group[0].recommended_action,
                 reviewed_at=existing.reviewed_at if existing else None,
@@ -103,8 +101,11 @@ class SignalAggregationService:
         primary_category: PrimaryCategory,
         mvp_area: MvpArea,
     ) -> str:
-        tokens = [token for token in TOKEN_RE.findall(text.lower()) if token not in STOPWORDS]
-        signature = sorted(dict.fromkeys((rules + tokens[:4])[:4]))
+        if rules:
+            signature = sorted(dict.fromkeys(rules))
+        else:
+            tokens = [token for token in TOKEN_RE.findall(text.lower()) if token not in STOPWORDS]
+            signature = sorted(dict.fromkeys(tokens[:4]))
         if not signature:
             signature = ["general"]
         return f"{mvp_area.value}:{primary_category.value}:{'-'.join(signature)}"

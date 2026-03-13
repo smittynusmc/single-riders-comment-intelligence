@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -9,7 +9,7 @@ const items = [
   { href: "/classifications", label: "Classifications" },
   { href: "/signals", label: "Signals" },
   { href: "/review", label: "Review Queue" },
-];
+] as const;
 
 export function Sidebar() {
   return (
@@ -18,7 +18,7 @@ export function Sidebar() {
         <p className="text-xs uppercase tracking-[0.3em] text-white/60">Internal Tool</p>
         <h2 className="mt-3 font-display text-2xl font-semibold">Feedback Signal Engine</h2>
         <p className="mt-3 text-sm leading-6 text-white/70">
-          CSV-first social comment intelligence for backlog planning, review workflows, and export handoff.
+          JSON-first social comment intelligence for backlog planning, review workflows, and export handoff.
         </p>
       </div>
       <nav className="space-y-2">
@@ -37,7 +37,7 @@ export function Sidebar() {
       <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-4">
         <p className="text-xs uppercase tracking-[0.24em] text-white/50">Phase 1</p>
         <p className="mt-2 text-sm leading-6 text-white/75">
-          CSV import is the MVP ingestion path. Manual and third-party adapters can plug into the same backend contract later.
+          TikTok JSON export upload is the MVP ingestion path. CSV, manual paste, and approved connectors can plug into the same contract later.
         </p>
       </div>
     </aside>

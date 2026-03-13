@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime
 from uuid import UUID
@@ -18,9 +18,9 @@ class CommentRepository:
     def existing_source_comment_ids(self, *, source_platform: SourcePlatform, source_comment_ids: list[str]) -> set[str]:
         if not source_comment_ids:
             return set()
-        stmt = select(NormalizedComment.source_comment_id).where(
-            NormalizedComment.source_platform == source_platform,
-            NormalizedComment.source_comment_id.in_(source_comment_ids),
+        stmt = select(RawComment.source_comment_id).where(
+            RawComment.source_platform == source_platform,
+            RawComment.source_comment_id.in_(source_comment_ids),
         )
         return set(self.session.scalars(stmt))
 

@@ -1,4 +1,4 @@
-﻿# Frontend
+# Frontend
 
 ## Goal
 
@@ -18,9 +18,11 @@ The web app is an internal admin dashboard for exploring comments, reviewing AI 
 
 ### `/imports`
 
-- CSV upload form
-- import history table
-- status, imported rows, duplicates, failed rows
+- drag-and-drop JSON-first upload form
+- CSV fallback upload support
+- file preview with detected format and shape
+- sample fields, missing fields, and parse warnings
+- import history table with source format and run status
 
 ### `/comments`
 
@@ -39,7 +41,7 @@ The web app is an internal admin dashboard for exploring comments, reviewing AI 
 
 - signal cards with grouped evidence
 - priority, evidence count, sample comments
-- reviewed/archive actions
+- reviewed and archive actions
 - GitHub and Trello export placeholders
 
 ### `/review`

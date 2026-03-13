@@ -7,6 +7,8 @@ coverage/
 .venv/
 .env
 *.pyc
+*.egg-info/
 apps/api/local.db
+apps/api/local_refactor.db
 apps/api/.env
 apps/web/.env.local

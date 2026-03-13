@@ -1,4 +1,4 @@
-﻿import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 import ImportsPage from "@/app/imports/page";
@@ -8,9 +8,10 @@ vi.mock("@/lib/api/imports", () => ({
     items: [
       {
         id: "run-1",
-        source_type: "csv",
+        source_type: "json_upload",
         source_platform: "tiktok",
-        source_label: "comments.csv",
+        import_format: "tiktok_json",
+        source_label: "comments.json",
         status: "completed",
         total_rows: 10,
         imported_rows: 8,
@@ -26,14 +27,16 @@ vi.mock("@/lib/api/imports", () => ({
     ],
     meta: { total: 1, limit: 20, offset: 0 },
   }),
+  previewImport: vi.fn(),
 }));
 
 describe("ImportsPage", () => {
   it("renders upload and history sections", async () => {
     render(await ImportsPage());
 
-    expect(screen.getByText("CSV Upload")).toBeInTheDocument();
+    expect(screen.getByText("Export Upload")).toBeInTheDocument();
     expect(screen.getByText("Import History")).toBeInTheDocument();
-    expect(screen.getByText("comments.csv")).toBeInTheDocument();
+    expect(screen.getByText("comments.json")).toBeInTheDocument();
+    expect(screen.getByText("tiktok json")).toBeInTheDocument();
   });
 });

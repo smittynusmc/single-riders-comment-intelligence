@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTransition } from "react";
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";

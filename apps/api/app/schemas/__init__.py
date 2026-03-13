@@ -1,1 +1,1 @@
-﻿"""Pydantic schemas shared across API and services."""
+"""Pydantic schemas shared across API and services."""

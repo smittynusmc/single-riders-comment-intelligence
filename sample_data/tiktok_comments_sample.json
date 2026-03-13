@@ -1,0 +1,49 @@
+{
+  "comments": [
+    {
+      "video_id": "video-101",
+      "comment_id": "comment-001",
+      "user": { "unique_id": "parkcrush" },
+      "text": "Need a same day meetup option for Disney people",
+      "create_time": "2026-03-01T12:00:00Z",
+      "digg_count": 42,
+      "reply_comment_total": 8
+    },
+    {
+      "video_id": "video-101",
+      "comment_id": "comment-002",
+      "user": { "unique_id": "ridebestie" },
+      "text": "Love this idea but please add a bot filter",
+      "create_time": "2026-03-01T13:20:00Z",
+      "digg_count": 18,
+      "reply_comment_total": 4
+    },
+    {
+      "video_id": "video-202",
+      "comment_id": "comment-003",
+      "user": { "unique_id": "annualpassamy" },
+      "text": "Passholder meetup alerts would be amazing",
+      "create_time": "2026-03-02T09:15:00Z",
+      "digg_count": 25,
+      "reply_comment_total": 3
+    },
+    {
+      "video_id": "video-202",
+      "comment_id": "comment-004",
+      "user": { "unique_id": "safeandsingle" },
+      "text": "How are you handling safety for first-time meetups?",
+      "create_time": "2026-03-02T11:05:00Z",
+      "digg_count": 55,
+      "reply_comment_total": 10
+    },
+    {
+      "video_id": "video-303",
+      "comment_id": "comment-005",
+      "user": { "unique_id": "coasterken" },
+      "text": "I would join the beta today if same-day matching worked",
+      "create_time": "2026-03-03T16:45:00Z",
+      "digg_count": 31,
+      "reply_comment_total": 6
+    }
+  ]
+}

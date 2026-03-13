@@ -1,15 +1,14 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
-from uuid import UUID
 
 from sqlalchemy import DateTime, Enum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
 from app.models.base import Base, TimestampedModel
-from app.models.enums import IngestionSourceType, IngestionStatus, SourcePlatform
+from app.models.enums import ImportFormat, IngestionSourceType, IngestionStatus, SourcePlatform
 
 
 class IngestionRun(TimestampedModel, Base):
@@ -19,6 +18,7 @@ class IngestionRun(TimestampedModel, Base):
 
     source_type: Mapped[IngestionSourceType] = mapped_column(Enum(IngestionSourceType), nullable=False)
     source_platform: Mapped[SourcePlatform] = mapped_column(Enum(SourcePlatform), nullable=False)
+    import_format: Mapped[ImportFormat] = mapped_column(Enum(ImportFormat), nullable=False)
     source_label: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[IngestionStatus] = mapped_column(
         Enum(IngestionStatus),

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from app.prompts.classification import CLASSIFICATION_PROMPT_VERSION, build_classification_messages
 

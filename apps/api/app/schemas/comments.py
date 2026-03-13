@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime
 from uuid import UUID
@@ -27,8 +27,9 @@ class RawCommentRead(ORMModel):
     id: UUID
     ingestion_run_id: UUID
     source_platform: SourcePlatform
-    source_video_id: str
+    source_video_id: str | None
     source_comment_id: str
+    source_parent_comment_id: str | None
     author_handle: str | None
     comment_text: str
     comment_created_at: datetime | None
@@ -36,6 +37,7 @@ class RawCommentRead(ORMModel):
     reply_count: int
     row_number: int | None
     is_duplicate: bool
+    raw_payload_json: dict
     created_at: datetime
     updated_at: datetime
 
@@ -45,8 +47,9 @@ class NormalizedCommentRead(ORMModel):
     raw_comment_id: UUID
     ingestion_run_id: UUID
     source_platform: SourcePlatform
-    source_video_id: str
+    source_video_id: str | None
     source_comment_id: str
+    source_parent_comment_id: str | None
     author_handle: str | None
     original_text: str
     normalized_text: str

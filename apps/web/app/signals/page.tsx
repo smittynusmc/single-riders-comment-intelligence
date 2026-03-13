@@ -1,4 +1,4 @@
-﻿import { PageHeader } from "@/components/layout/page-header";
+import { PageHeader } from "@/components/layout/page-header";
 import { SignalFilters } from "@/components/signals/signal-filters";
 import { SignalCard } from "@/components/signals/signal-card";
 import { getSignals } from "@/lib/api/signals";
