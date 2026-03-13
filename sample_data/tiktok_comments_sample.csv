@@ -1,0 +1,6 @@
+﻿source_video_id,source_comment_id,author_handle,comment_text,created_at,like_count,reply_count
+video-101,comment-001,parkcrush,"Need a same day meetup option for Disney people",2026-03-01T12:00:00Z,42,8
+video-101,comment-002,ridebestie,"Love this idea but please add a bot filter",2026-03-01T13:20:00Z,18,4
+video-202,comment-003,annualpassamy,"Passholder meetup alerts would be amazing",2026-03-02T09:15:00Z,25,3
+video-202,comment-004,safeandsingle,"How are you handling safety for first-time meetups?",2026-03-02T11:05:00Z,55,10
+video-303,comment-005,coasterken,"I would join the beta today if same-day matching worked",2026-03-03T16:45:00Z,31,6
