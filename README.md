@@ -77,6 +77,10 @@ sample_data/
 6. Seed from the sample TikTok JSON export if desired:
    - `python -m app.scripts.seed`
 
+Windows shortcut:
+
+- `.\scripts\dev-api.ps1`
+
 ### Frontend
 
 1. Copy `apps/web/.env.example` to `apps/web/.env.local`.
@@ -84,6 +88,10 @@ sample_data/
    - `npm install`
 3. Start the dashboard:
    - `npm run dev:web`
+
+Windows shortcut for NVM-managed Node 20+:
+
+- `.\scripts\dev-web.ps1`
 
 ### Docker compose
 
