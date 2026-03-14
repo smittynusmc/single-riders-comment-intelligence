@@ -69,6 +69,8 @@ Hosted deployment is now the primary internal path.
 
 Use [hosted-deployment.md](/c:/single-riders-comment-intelligence/docs/hosted-deployment.md) for the full setup guide, including Vercel setup, Railway setup, environment variables, first admin setup, allowlist setup, and shared upload storage behavior.
 
+For Railway, point the service Root Directory at `apps/api` and let it install [requirements.txt](/c:/single-riders-comment-intelligence/apps/api/requirements.txt) so runtime tools like `alembic` are available before the `Procfile` start command runs.
+
 ## Fallback handoff
 
 The native and Docker handoff flows remain available as fallback options when hosted deployment is not the right fit.

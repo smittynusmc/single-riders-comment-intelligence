@@ -103,14 +103,22 @@ Notes:
 
 1. Create a new Railway service from this repository.
 2. Set the service Root Directory to `apps/api`.
-3. Attach a shared PostgreSQL database or point `SCI_DATABASE_URL` at your hosted Postgres.
-4. Add the Railway environment variables listed above.
-5. Deploy.
+3. Leave the build command blank so Railpack uses [requirements.txt](/c:/single-riders-comment-intelligence/apps/api/requirements.txt), or set a custom build command of `pip install -r requirements.txt` if you want the install step to be explicit.
+4. Attach a shared PostgreSQL database or point `SCI_DATABASE_URL` at your hosted Postgres.
+5. Add the Railway environment variables listed above.
+6. Deploy.
 
 Notes:
 
 - [Procfile](/c:/single-riders-comment-intelligence/apps/api/Procfile) runs `alembic upgrade head` before starting `uvicorn`.
+- [requirements.txt](/c:/single-riders-comment-intelligence/apps/api/requirements.txt) is included for Railpack compatibility because this workspace uses a plain setuptools `pyproject.toml` rather than Poetry, PDM, `uv`, or Pipenv.
 - The hosted-first path uses `SCI_WORKER_MODE=inline`, so you do not need a separate worker service for the initial internal deployment.
+
+If Railway logs show `sh: 1: alembic: not found`, the service is starting without dependencies installed. Recheck that:
+
+1. the service Root Directory is `apps/api`
+2. Railpack sees [requirements.txt](/c:/single-riders-comment-intelligence/apps/api/requirements.txt)
+3. the build command is blank or explicitly `pip install -r requirements.txt`
 
 ## First admin user setup
 
