@@ -60,14 +60,19 @@ async function proxyRequest(request: NextRequest, pathSegments: string[]) {
   });
 }
 
-export async function GET(request: NextRequest, context: { params: { path: string[] } }) {
-  return proxyRequest(request, context.params.path);
+async function resolvePath(context: { params: Promise<{ path: string[] }> }) {
+  const { path } = await context.params;
+  return path;
 }
 
-export async function POST(request: NextRequest, context: { params: { path: string[] } }) {
-  return proxyRequest(request, context.params.path);
+export async function GET(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(request, await resolvePath(context));
 }
 
-export async function PATCH(request: NextRequest, context: { params: { path: string[] } }) {
-  return proxyRequest(request, context.params.path);
+export async function POST(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(request, await resolvePath(context));
+}
+
+export async function PATCH(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(request, await resolvePath(context));
 }

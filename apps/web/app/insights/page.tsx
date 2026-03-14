@@ -4,6 +4,8 @@ import { TopVideosList } from "@/components/dashboard/top-videos-list";
 import { PageHeader } from "@/components/layout/page-header";
 import { getAudienceInsights } from "@/lib/api/dashboard";
 
+export const dynamic = "force-dynamic";
+
 export default async function InsightsPage() {
   const audienceInsights = await getAudienceInsights();
 

@@ -2,6 +2,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ReviewQueueTable } from "@/components/review/review-queue-table";
 import { getClassifications } from "@/lib/api/classifications";
 
+export const dynamic = "force-dynamic";
+
 export default async function ReviewQueuePage() {
   const response = await getClassifications({ needs_human_review: true, limit: 100 });
 

@@ -3,6 +3,8 @@ import { ImportUploadForm } from "@/components/imports/csv-upload-form";
 import { ImportHistoryTable } from "@/components/imports/import-history-table";
 import { getImports } from "@/lib/api/imports";
 
+export const dynamic = "force-dynamic";
+
 export default async function ImportsPage() {
   const history = await getImports({ limit: 20 });
 

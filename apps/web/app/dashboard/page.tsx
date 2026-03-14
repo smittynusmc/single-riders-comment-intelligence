@@ -8,6 +8,8 @@ import { TopVideosList } from "@/components/dashboard/top-videos-list";
 import { TrendChart } from "@/components/dashboard/trend-chart";
 import { getAudienceInsights, getDashboardSummary, getDashboardTrends, getTopSignals } from "@/lib/api/dashboard";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const [summary, trends, topSignals, audienceInsights] = await Promise.all([
     getDashboardSummary(),

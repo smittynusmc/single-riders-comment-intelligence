@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { getComments } from "@/lib/api/comments";
 import { getDashboardSummary } from "@/lib/api/dashboard";
 
+export const dynamic = "force-dynamic";
+
 function buildFilterPills(params: Record<string, string | boolean | number | undefined | null>): ActiveFilterPill[] {
   const pills: ActiveFilterPill[] = [];
 

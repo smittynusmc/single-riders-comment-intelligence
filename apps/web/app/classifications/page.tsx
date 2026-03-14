@@ -2,6 +2,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ClassificationTable } from "@/components/classifications/classification-table";
 import { getClassifications } from "@/lib/api/classifications";
 
+export const dynamic = "force-dynamic";
+
 export default async function ClassificationsPage() {
   const response = await getClassifications({ limit: 100 });
 

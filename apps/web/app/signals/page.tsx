@@ -5,6 +5,8 @@ import { SignalCard } from "@/components/signals/signal-card";
 import { getAudienceInsights } from "@/lib/api/dashboard";
 import { getSignals } from "@/lib/api/signals";
 
+export const dynamic = "force-dynamic";
+
 export default async function SignalsPage() {
   const [response, audienceInsights] = await Promise.all([
     getSignals({ limit: 50 }),
