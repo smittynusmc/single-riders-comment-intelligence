@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import db_session
+from app.api.deps import authenticated_user_email, db_session
 from app.jobs.queue import TaskQueue
 from app.repositories.comments import CommentRepository
 from app.repositories.ingestion_runs import IngestionRunRepository
@@ -56,11 +56,17 @@ async def preview_import(
 @router.post("/csv", response_model=ImportResponse, status_code=status.HTTP_202_ACCEPTED)
 async def import_csv(
     file: UploadFile = File(...),
+    user_email: str | None = Depends(authenticated_user_email),
     session: Session = Depends(db_session),
 ) -> ImportResponse:
     file_bytes = await _read_upload(file, expected_label="CSV")
     try:
-        run = _import_service(session).import_csv_bytes(file_bytes=file_bytes, filename=file.filename or "comments.csv")
+        run = _import_service(session).import_csv_bytes(
+            file_bytes=file_bytes,
+            filename=file.filename or "comments.csv",
+            content_type=file.content_type,
+            uploaded_by_email=user_email,
+        )
         session.commit()
     except ValueError as exc:
         session.rollback()
@@ -74,11 +80,17 @@ async def import_csv(
 @router.post("/json", response_model=ImportResponse, status_code=status.HTTP_202_ACCEPTED)
 async def import_json(
     file: UploadFile = File(...),
+    user_email: str | None = Depends(authenticated_user_email),
     session: Session = Depends(db_session),
 ) -> ImportResponse:
     file_bytes = await _read_upload(file, expected_label="JSON")
     try:
-        run = _import_service(session).import_json_bytes(file_bytes=file_bytes, filename=file.filename or "comments.json")
+        run = _import_service(session).import_json_bytes(
+            file_bytes=file_bytes,
+            filename=file.filename or "comments.json",
+            content_type=file.content_type,
+            uploaded_by_email=user_email,
+        )
         session.commit()
     except ValueError as exc:
         session.rollback()

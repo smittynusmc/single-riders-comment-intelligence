@@ -5,13 +5,28 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TrendPoint } from "@single-riders/shared-types";
 
+function inferGranularity(points: TrendPoint[]) {
+  return points.some((point) => point.bucket.length === 7) ? "month" : "day";
+}
+
+function formatBucket(bucket: string, granularity: "month" | "day") {
+  if (granularity === "month") {
+    const [year, month] = bucket.split("-").map(Number);
+    return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(new Date(Date.UTC(year, month - 1, 1)));
+  }
+
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(`${bucket}T00:00:00Z`));
+}
+
 export function TrendChart({ points }: { points: TrendPoint[] }) {
+  const granularity = inferGranularity(points);
+
   return (
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Weekly Trend Summary</CardTitle>
-          <CardDescription>Comment volume against human review pressure over the last two weeks.</CardDescription>
+          <CardTitle>{granularity === "month" ? "Monthly Trend Summary" : "Daily Trend Summary"}</CardTitle>
+          <CardDescription>Comment volume and review pressure across the full imported date span.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="h-[340px]">
@@ -28,9 +43,9 @@ export function TrendChart({ points }: { points: TrendPoint[] }) {
               </linearGradient>
             </defs>
             <CartesianGrid stroke="rgba(17,32,49,0.08)" vertical={false} />
-            <XAxis dataKey="bucket" tickLine={false} axisLine={false} />
+            <XAxis dataKey="bucket" tickLine={false} axisLine={false} tickFormatter={(value) => formatBucket(String(value), granularity)} />
             <YAxis tickLine={false} axisLine={false} />
-            <Tooltip />
+            <Tooltip labelFormatter={(value) => formatBucket(String(value), granularity)} />
             <Area type="monotone" dataKey="comments" stroke="#2c5545" fill="url(#commentsFill)" strokeWidth={3} />
             <Area type="monotone" dataKey="review_queue" stroke="#cf5f4f" fill="url(#reviewFill)" strokeWidth={3} />
           </AreaChart>

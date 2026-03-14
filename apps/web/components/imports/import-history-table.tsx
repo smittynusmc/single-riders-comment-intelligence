@@ -5,6 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableElement, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils/format";
 
+function formatBytes(value: number | null) {
+  if (!value) {
+    return "stored centrally";
+  }
+  if (value < 1024) {
+    return `${value} B`;
+  }
+  if (value < 1024 * 1024) {
+    return `${(value / 1024).toFixed(1)} KB`;
+  }
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function ImportHistoryTable({ runs }: { runs: IngestionRun[] }) {
   return (
     <Card>
@@ -31,7 +44,14 @@ export function ImportHistoryTable({ runs }: { runs: IngestionRun[] }) {
             <TableBody>
               {runs.map((run) => (
                 <TableRow key={run.id}>
-                  <TableCell>{run.source_label}</TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium text-ink">{run.source_label}</p>
+                      <p className="text-xs text-slate">
+                        {run.uploaded_by_email ? `uploaded by ${run.uploaded_by_email}` : "uploaded before hosted auth"}
+                      </p>
+                    </div>
+                  </TableCell>
                   <TableCell>{run.import_format.replaceAll("_", " ")}</TableCell>
                   <TableCell>
                     <Badge variant={run.status === "completed" ? "success" : run.status === "failed" ? "danger" : "warning"}>
@@ -41,7 +61,12 @@ export function ImportHistoryTable({ runs }: { runs: IngestionRun[] }) {
                   <TableCell>{run.imported_rows}</TableCell>
                   <TableCell>{run.duplicate_rows}</TableCell>
                   <TableCell>{run.failed_rows}</TableCell>
-                  <TableCell>{formatDate(run.updated_at)}</TableCell>
+                  <TableCell>
+                    <div>
+                      <p>{formatDate(run.updated_at)}</p>
+                      <p className="text-xs text-slate">{formatBytes(run.source_file_size_bytes)}</p>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

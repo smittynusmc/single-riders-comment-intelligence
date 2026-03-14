@@ -50,7 +50,7 @@ class CommentClassificationRead(ORMModel):
 
 class NormalizedCommentReviewContext(ORMModel):
     id: UUID
-    source_video_id: str
+    source_video_id: str | None
     source_comment_id: str
     author_handle: str | None
     original_text: str

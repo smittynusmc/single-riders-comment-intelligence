@@ -34,6 +34,7 @@ Supports:
 - top-level arrays of comment objects
 - objects containing `comments`
 - portability-style wrappers such as `Activity -> Comments`
+- TikTok download wrappers such as `Comment -> Comments -> CommentsList`
 
 It preserves the original raw JSON payload for every comment and generates clear warnings when optional fields such as `source_video_id` or `comment_created_at` are missing.
 
@@ -62,6 +63,11 @@ The imports page uses `POST /imports/preview` before import. The preview respons
 - detected format
 - detected shape
 - parsed comment count
+- earliest detected comment date
+- latest detected comment date
+- months represented
+- sections detected
+- sections ignored for privacy/scope reasons
 - sample fields
 - missing canonical fields
 - parse warnings
@@ -90,3 +96,22 @@ Exists only as a future seam. It should remain unimplemented until an official c
 - canonical processing happens only once in `normalized_comments`
 
 This preserves auditability while keeping the downstream pipeline from double-counting the same source comment.
+
+## Stage audit metadata
+
+Each import run now records pipeline audit metadata in `ingestion_runs.run_metadata` so the team can compare counts and date spans across stages:
+
+- `json_parsing`
+- `raw_comments_persisted`
+- `normalized_comments`
+- `classification_inputs`
+- `classified_comments`
+
+Each stage records:
+
+- total comments seen
+- earliest comment date
+- latest comment date
+- number of months represented
+
+This was added specifically to catch regressions where a multi-month TikTok export appears narrower in the UI than it really is.

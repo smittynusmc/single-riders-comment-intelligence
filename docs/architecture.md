@@ -21,10 +21,11 @@ TikTok JSON export / portability JSON / research response JSON / CSV fallback
   -> rules pre-pass
   -> configurable classifier
   -> comment_classifications
+  -> audience insights ranking
   -> signal aggregation
   -> mvp_signals + signal_comment_links
   -> admin API
-  -> internal dashboard / export placeholders
+  -> internal dashboard / audience insights / guide / export placeholders
 ```
 
 ## Why adapters first
@@ -97,9 +98,20 @@ Stores the evidence mapping between grouped signals and comment classifications.
 - `NormalizationService`: canonical text cleanup and rule tagging
 - `KeywordRuleService`: deterministic pre-pass for obvious keywords
 - `CommentClassificationService`: structured classification with provider abstraction
+- `AudienceInsightsService`: MVP-theme ranking, story alignment, concern tracking, and top-video summaries
 - `SignalAggregationService`: converts many classified comments into a smaller ranked signal set
 - `DashboardService`: summary, trends, and signal read models for the frontend
 - `ExportService`: safe placeholders for GitHub, Trello, and docs export flows
+
+`ImportService` and `IngestionPipelineService` now also record stage-by-stage audit metadata for:
+
+- parsed comments
+- raw comments persisted
+- normalized comments
+- classification inputs
+- classified comments
+
+Each stage stores total comments seen plus earliest date, latest date, and months represented so date-range regressions can be traced to the exact layer where narrowing begins.
 
 ## Worker model
 
@@ -139,3 +151,39 @@ Phase 1 uses deterministic fingerprinting based on:
 - normalized keyword signature
 
 This keeps the implementation understandable while leaving room for future embedding-based clustering if the comment volume demands it.
+
+## Audience insights layer
+
+The audience-insights module sits between raw classification output and grouped signals. It exists because the team needs more than a queue of comments; it needs a fast answer to the question "what matters most for the MVP right now?"
+
+The ranking layer maps feedback to doc-aligned themes such as:
+
+- dating mode
+- friendship mode
+- matching and filters
+- profiles and self-expression
+- messaging and chat
+- safety and moderation
+- beta onboarding
+- account lifecycle
+
+The scoring model combines:
+
+- evidence count
+- relevance
+- urgency
+- confidence
+- recent momentum
+- explicit boosts for safety and confusion themes
+
+This is intentionally opinionated so founders and product can move from noisy comments to roadmap-level signals faster.
+
+## Date-range behavior
+
+Dashboard date coverage is based on imported comment timestamps, not the current month or the latest import window.
+
+- short spans stay daily
+- longer spans automatically switch to monthly buckets
+- the UI shows earliest detected date, latest detected date, months represented, and the current active filter range
+
+This change was added after auditing a TikTok export that spanned July 2025 through March 2026 and confirming the real root cause was a fixed 14-day trend window in the dashboard layer rather than a parser/import failure.

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import logging
+from datetime import UTC, datetime
 from typing import Any
 
 from app.adapters.base import AdapterImportResult, CanonicalCommentObject
@@ -21,6 +25,12 @@ OPTIONAL_CANONICAL_FIELDS = (
     "like_count",
     "reply_count",
 )
+APPROVED_JSON_SECTIONS = {"activity", "comment", "comments", "post"}
+logger = logging.getLogger(__name__)
+
+
+def ensure_utc(value: datetime) -> datetime:
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 class ImportService:
@@ -39,11 +49,26 @@ class ImportService:
         sample_payload = comments[0].raw_payload if comments else {}
         sample_fields = self._flatten_payload_keys(sample_payload)
         missing_fields = self._missing_fields(comments[0]) if comments else list(REQUIRED_CANONICAL_FIELDS)
+        sections_detected, sections_ignored = self._preview_section_scope(file_bytes=file_bytes, filename=filename)
+        earliest_comment_date, latest_comment_date, months_represented = self._comment_date_coverage(comments)
+        logger.info(
+            "Import preview parsed %s comments spanning %s to %s across %s months from %s",
+            len(comments),
+            earliest_comment_date.isoformat() if earliest_comment_date else None,
+            latest_comment_date.isoformat() if latest_comment_date else None,
+            months_represented,
+            filename,
+        )
 
         return ImportPreviewResponse(
             detected_format=result.import_format,
             detected_shape=result.detected_shape,
             comment_count=len(comments),
+            earliest_comment_date=earliest_comment_date,
+            latest_comment_date=latest_comment_date,
+            months_represented=months_represented,
+            sections_detected=sections_detected,
+            sections_ignored=sections_ignored,
             sample_fields=sample_fields,
             missing_fields=missing_fields,
             parse_warnings=result.parse_warnings,
@@ -59,18 +84,38 @@ class ImportService:
             ],
         )
 
-    def import_csv_bytes(self, *, file_bytes: bytes, filename: str):
+    def import_csv_bytes(
+        self,
+        *,
+        file_bytes: bytes,
+        filename: str,
+        content_type: str | None = None,
+        uploaded_by_email: str | None = None,
+    ):
         return self._persist_adapter_result(
             result=self.csv_adapter.import_comments(file_bytes),
             filename=filename,
             adapter_name="csv",
+            file_bytes=file_bytes,
+            content_type=content_type,
+            uploaded_by_email=uploaded_by_email,
         )
 
-    def import_json_bytes(self, *, file_bytes: bytes, filename: str):
+    def import_json_bytes(
+        self,
+        *,
+        file_bytes: bytes,
+        filename: str,
+        content_type: str | None = None,
+        uploaded_by_email: str | None = None,
+    ):
         return self._persist_adapter_result(
             result=self._load_adapter_result(file_bytes=file_bytes, filename=filename),
             filename=filename,
             adapter_name="json",
+            file_bytes=file_bytes,
+            content_type=content_type,
+            uploaded_by_email=uploaded_by_email,
         )
 
     def _load_adapter_result(self, *, file_bytes: bytes, filename: str) -> AdapterImportResult:
@@ -94,18 +139,43 @@ class ImportService:
             f"Details: {' | '.join(errors)}"
         )
 
-    def _persist_adapter_result(self, *, result: AdapterImportResult, filename: str, adapter_name: str):
+    def _persist_adapter_result(
+        self,
+        *,
+        result: AdapterImportResult,
+        filename: str,
+        adapter_name: str,
+        file_bytes: bytes,
+        content_type: str | None,
+        uploaded_by_email: str | None,
+    ):
+        parsing_coverage = self._coverage_payload_from_comments(result.comments)
+        source_file_sha256 = hashlib.sha256(file_bytes).hexdigest()
         run = self.ingestion_repository.create(
             source_type=result.source_type,
             source_platform=result.source_platform,
             import_format=result.import_format,
             source_label=filename,
+            uploaded_by_email=uploaded_by_email,
+            source_file_content_type=content_type,
+            source_file_size_bytes=len(file_bytes),
+            source_file_sha256=source_file_sha256,
+            source_file_blob=file_bytes,
             run_metadata={
                 "adapter": adapter_name,
                 "source_filename": filename,
                 "detected_shape": result.detected_shape,
                 "parse_warnings": result.parse_warnings,
+                "source_artifact": {
+                    "storage_backend": "database_blob",
+                    "content_type": content_type,
+                    "size_bytes": len(file_bytes),
+                    "sha256": source_file_sha256,
+                },
                 "failed_samples": [failure.model_dump() for failure in result.failures[:10]],
+                "pipeline_audit": {
+                    "json_parsing": parsing_coverage,
+                },
             },
             status=IngestionStatus.PENDING,
         )
@@ -146,6 +216,18 @@ class ImportService:
             )
 
         self.comment_repository.create_raw_comments(raw_comments)
+        raw_coverage = self._coverage_payload_from_raw_comments(raw_comments)
+        run.run_metadata = {
+            **dict(run.run_metadata),
+            "pipeline_audit": {
+                **dict(run.run_metadata.get("pipeline_audit", {})),
+                "raw_comments_persisted": {
+                    **raw_coverage,
+                    "duplicate_rows": duplicate_rows,
+                    "imported_rows": imported_rows,
+                },
+            },
+        }
         self.ingestion_repository.apply_summary(
             run,
             total_rows=result.total_rows,
@@ -153,6 +235,14 @@ class ImportService:
             duplicate_rows=duplicate_rows,
             failed_rows=len(result.failures),
             status=IngestionStatus.IMPORTED,
+        )
+        logger.info(
+            "Import persisted %s raw comments spanning %s to %s across %s months from %s",
+            raw_coverage["total_comments_seen"],
+            raw_coverage["earliest_comment_date"],
+            raw_coverage["latest_comment_date"],
+            raw_coverage["months_represented"],
+            filename,
         )
         return run
 
@@ -175,3 +265,50 @@ class ImportService:
             if value in (None, ""):
                 fields.append(name)
         return fields
+
+    def _preview_section_scope(self, *, file_bytes: bytes, filename: str) -> tuple[list[str], list[str]]:
+        if not filename.lower().endswith(".json"):
+            return [], []
+
+        try:
+            payload = json.loads(file_bytes.decode("utf-8-sig"))
+        except Exception:
+            return [], []
+
+        if not isinstance(payload, dict):
+            return [], []
+
+        sections_detected = [str(key) for key in payload.keys()]
+        sections_ignored = [section for section in sections_detected if section.lower() not in APPROVED_JSON_SECTIONS]
+        return sections_detected, sections_ignored
+
+    def _comment_date_coverage(self, comments: list[CanonicalCommentObject]) -> tuple[datetime | None, datetime | None, int]:
+        dates = [ensure_utc(comment.comment_created_at) for comment in comments if comment.comment_created_at is not None]
+        if not dates:
+            return None, None, 0
+
+        earliest = min(dates)
+        latest = max(dates)
+        months_represented = len({(value.year, value.month) for value in dates})
+        return earliest, latest, months_represented
+
+    def _coverage_payload_from_comments(self, comments: list[CanonicalCommentObject]) -> dict[str, Any]:
+        earliest, latest, months_represented = self._comment_date_coverage(comments)
+        return {
+            "total_comments_seen": len(comments),
+            "earliest_comment_date": earliest.isoformat() if earliest else None,
+            "latest_comment_date": latest.isoformat() if latest else None,
+            "months_represented": months_represented,
+        }
+
+    def _coverage_payload_from_raw_comments(self, comments: list[RawComment]) -> dict[str, Any]:
+        dates = [ensure_utc(comment.comment_created_at) for comment in comments if comment.comment_created_at is not None]
+        earliest = min(dates).isoformat() if dates else None
+        latest = max(dates).isoformat() if dates else None
+        months_represented = len({(value.year, value.month) for value in dates}) if dates else 0
+        return {
+            "total_comments_seen": len(comments),
+            "earliest_comment_date": earliest,
+            "latest_comment_date": latest,
+            "months_represented": months_represented,
+        }

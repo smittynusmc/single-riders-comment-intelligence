@@ -9,6 +9,7 @@ import { apiUpload } from "@/lib/api/client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImportSummaryCard } from "@/components/imports/import-summary-card";
 import { Input } from "@/components/ui/input";
 
 function inferImportEndpoint(fileName: string, detectedFormat?: ImportFormat) {
@@ -133,6 +134,7 @@ export function ImportUploadForm() {
             <span className="rounded-full bg-paper px-3 py-1 shadow-sm">JSON-first</span>
             <span className="rounded-full bg-paper px-3 py-1 shadow-sm">CSV convenience</span>
             <span className="rounded-full bg-paper px-3 py-1 shadow-sm">No OAuth comment sync</span>
+            <span className="rounded-full bg-paper px-3 py-1 shadow-sm">DMs ignored by default</span>
           </div>
 
           {isPreviewPending ? <p className="text-sm text-slate">Parsing file summary...</p> : null}
@@ -152,6 +154,18 @@ export function ImportUploadForm() {
                   <p className="text-xs uppercase tracking-[0.2em] text-slate">Parsed Comments</p>
                   <p className="mt-1 text-sm font-semibold text-ink">{preview.comment_count}</p>
                 </div>
+              </div>
+
+              <ImportSummaryCard preview={preview} />
+
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate">Sections Detected</p>
+                <PreviewList items={preview.sections_detected} />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate">Ignored For Privacy / Scope</p>
+                <PreviewList items={preview.sections_ignored} />
               </div>
 
               <div className="space-y-2">
@@ -184,6 +198,10 @@ export function ImportUploadForm() {
                   </div>
                 </div>
               ) : null}
+
+              <div className="rounded-2xl bg-white/80 px-4 py-3 text-sm text-slate">
+                Phase 1 only imports comment feedback and optional post context. Sensitive account metadata and private messages stay out of this workflow.
+              </div>
             </div>
           ) : null}
 

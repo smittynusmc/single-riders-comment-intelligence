@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./local.db"
     redis_url: str = "redis://localhost:6379/0"
     allowed_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:3000"])
+    internal_api_token: str | None = None
     worker_mode: str = "inline"
     llm_provider: str = "stub"
     llm_model: str = "single-riders-comment-intelligence-v1"

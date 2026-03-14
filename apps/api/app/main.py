@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.core.config import get_settings
@@ -21,6 +22,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def require_internal_api_token(request: Request, call_next):
+    if request.url.path == "/health" or not settings.internal_api_token:
+        return await call_next(request)
+
+    if request.headers.get("x-internal-api-token") != settings.internal_api_token:
+        return JSONResponse(status_code=401, content={"detail": "Missing or invalid internal API token."})
+
+    request.state.authenticated_user_email = request.headers.get("x-authenticated-user-email")
+    return await call_next(request)
 
 
 @app.get("/health", tags=["health"])

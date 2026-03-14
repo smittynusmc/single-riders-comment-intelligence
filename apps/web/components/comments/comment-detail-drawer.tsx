@@ -13,6 +13,11 @@ export function CommentDetailDrawer({
   comment: CommentItem | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const sourceUrl =
+    comment && typeof comment.raw_comment.raw_payload_json.url === "string" && comment.raw_comment.raw_payload_json.url
+      ? String(comment.raw_comment.raw_payload_json.url)
+      : null;
+
   return (
     <Dialog open={Boolean(comment)} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -27,11 +32,27 @@ export function CommentDetailDrawer({
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-slate">Video</p>
-                <p className="mt-2">{comment.raw_comment.source_video_id}</p>
+                <p className="mt-2">{comment.raw_comment.source_video_id ?? "No video id on this export"}</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.18em] text-slate">Created</p>
                 <p className="mt-2">{formatDate(comment.raw_comment.comment_created_at)}</p>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate">Author</p>
+                <p className="mt-2">{comment.raw_comment.author_handle ?? "Unknown author"}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate">Source URL</p>
+                {sourceUrl ? (
+                  <a className="mt-2 inline-block text-sm text-spruce underline underline-offset-4" href={sourceUrl} target="_blank" rel="noreferrer">
+                    Open original context
+                  </a>
+                ) : (
+                  <p className="mt-2">No source URL stored in the export</p>
+                )}
               </div>
             </div>
             {comment.classification ? (
@@ -44,6 +65,7 @@ export function CommentDetailDrawer({
                   </Badge>
                 </div>
                 <p>{comment.classification.rationale_short}</p>
+                <p className="text-sm text-slate">{comment.classification.recommended_action}</p>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.18em] text-slate">Confidence</p>
@@ -62,6 +84,12 @@ export function CommentDetailDrawer({
             ) : (
               <p className="rounded-3xl bg-gold/10 p-4 text-gold">Classification has not completed yet for this comment.</p>
             )}
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate">Raw Payload</p>
+              <pre className="mt-2 max-h-64 overflow-auto rounded-3xl bg-ink p-4 text-xs leading-6 text-white/85">
+                {JSON.stringify(comment.raw_comment.raw_payload_json, null, 2)}
+              </pre>
+            </div>
           </div>
         ) : null}
       </DialogContent>

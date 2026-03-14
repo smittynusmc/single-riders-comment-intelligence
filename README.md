@@ -21,10 +21,14 @@ packages/
 docs/
   architecture.md
   frontend.md
+  handoff.md
   ingestion.md
+  mvp-audience-insights.md
+  native-handoff.md
 infra/
   docker/
   docker-compose.yml
+  windows/
 sample_data/
   tiktok_comments_sample.json
   tiktok_comments_sample.csv
@@ -49,8 +53,63 @@ sample_data/
 - Tailwind and shadcn-style primitives
 - TanStack Table for explorer and review tables
 - Recharts trend chart on the dashboard
-- Imports page with drag-and-drop upload, format preview, sample fields, missing fields, and parse warnings
-- Pages for dashboard, imports, comments, classifications, signals, and review queue
+- Audience insights ranking tied to MVP themes and user-story alignment
+- Imports page with drag-and-drop upload, format preview, sections detected, ignored sections, sample fields, missing fields, and parse warnings
+- In-app guide page with workflow help, glossary, and data-scope rules
+- Pages for dashboard, audience insights, imports, comments, classifications, signals, guide, and review queue
+
+## Hosted deployment
+
+Hosted deployment is now the primary internal path.
+
+- Frontend: Vercel
+- Backend: Railway
+- Database: shared hosted PostgreSQL
+- Access: allowlisted internal users only
+
+Use [hosted-deployment.md](/c:/single-riders-comment-intelligence/docs/hosted-deployment.md) for the full setup guide, including Vercel setup, Railway setup, environment variables, first admin setup, allowlist setup, and shared upload storage behavior.
+
+## Fallback handoff
+
+The native and Docker handoff flows remain available as fallback options when hosted deployment is not the right fit.
+
+This repo now supports two teammate-friendly handoff paths:
+
+- native Windows packaging for teammates who should not install Python, Node, PostgreSQL, or Redis
+- Docker handoff as the fallback path when you want the whole stack containerized
+
+### Native Windows handoff
+
+1. Build the native package with `.\scripts\build-native-installer.bat`.
+2. Share the installer or the portable zip from `dist\native`.
+3. On the teammate machine, install or unzip the package.
+4. Double-click `scripts\start-native.bat`.
+5. Double-click `scripts\stop-native.bat` when you are done.
+
+The native bundle includes the API executable, the standalone web server, a bundled Node runtime, and SQLite storage. See [native-handoff.md](/c:/single-riders-comment-intelligence/docs/native-handoff.md).
+
+### Docker handoff
+
+1. Install Docker Desktop and open it once.
+2. Unzip the shared handoff bundle.
+3. Double-click `scripts\start-handoff.bat`.
+4. Wait for the browser to open `http://localhost:3000/guide`.
+5. Double-click `scripts\stop-handoff.bat` when you are done.
+
+This creates a teammate-friendly environment with Docker services and automatic database migrations. See [handoff.md](/c:/single-riders-comment-intelligence/docs/handoff.md) for the full Docker-based flow.
+
+## Get your TikTok JSON export
+
+Use TikTok's official export flow:
+
+1. Open TikTok and go to `Profile`.
+2. Open `Menu` > `Settings and privacy` > `Account` > `Download your data`.
+3. Choose `JSON` as the file format for this app.
+4. Submit the request and download the file when TikTok makes it available.
+
+TikTok's official support page is here:
+
+- https://support.tiktok.com/en/account-and-privacy/personalized-ads-and-data/how-to-download-your-data
 
 ## Local development
 
@@ -121,6 +180,7 @@ Use [tiktok_comments_sample.json](/c:/single-riders-comment-intelligence/sample_
 - `GET /dashboard/summary`
 - `GET /dashboard/trends`
 - `GET /dashboard/top-signals`
+- `GET /dashboard/audience-insights`
 
 ## Tests
 

@@ -4,14 +4,15 @@ from collections import Counter, defaultdict
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.classification import CommentClassification
 from app.models.comment import RawComment
 from app.models.enums import PrimaryCategory
 from app.models.signal import MvpSignal
 from app.repositories.signals import SignalRepository
-from app.schemas.dashboard import BreakdownItem, DashboardSummary, TopSignalSummary, TrendPoint
+from app.schemas.dashboard import AudienceInsightsResponse, BreakdownItem, DashboardSummary, TopSignalSummary, TrendPoint
+from app.services.audience_insights import AudienceInsightsService
 
 
 def ensure_utc(value: datetime) -> datetime:
@@ -29,7 +30,9 @@ class DashboardService:
         raw_comments = list(self.session.scalars(select(RawComment)))
         classifications = list(self.session.scalars(select(CommentClassification)))
         signals = list(self.session.scalars(select(MvpSignal)))
+        insights = AudienceInsightsService(self.session).get_insights()
         week_start = datetime.now(UTC) - timedelta(days=7)
+        earliest_comment_date, latest_comment_date, months_represented = self._date_coverage(raw_comments)
 
         total_comments = len(raw_comments)
         comments_this_week = sum(
@@ -56,33 +59,48 @@ class DashboardService:
             comments_this_week=comments_this_week,
             needs_review_count=needs_review_count,
             total_signals=len(signals),
+            earliest_comment_date=earliest_comment_date,
+            latest_comment_date=latest_comment_date,
+            months_represented=months_represented,
             top_categories=[BreakdownItem(key=key, count=count) for key, count in category_counts.most_common(5)],
             top_mvp_areas=[BreakdownItem(key=key, count=count) for key, count in mvp_counts.most_common(5)],
             top_repeated_requests=top_repeated_requests,
             top_safety_concerns=[BreakdownItem(key=key, count=count) for key, count in safety_counts.most_common(5)],
+            top_user_concerns=[BreakdownItem(key=item.label, count=item.evidence_count) for item in insights.user_concerns],
+            top_confusion_points=[BreakdownItem(key=item.label, count=item.evidence_count) for item in insights.confusion_points],
+            top_positive_validation=[BreakdownItem(key=item.label, count=item.evidence_count) for item in insights.positive_validation],
         )
 
-    def get_trends(self, days: int = 14) -> list[TrendPoint]:
+    def get_trends(self) -> list[TrendPoint]:
         raw_comments = list(self.session.scalars(select(RawComment)))
-        classifications = list(self.session.scalars(select(CommentClassification)))
+        classifications = list(
+            self.session.scalars(select(CommentClassification).options(selectinload(CommentClassification.normalized_comment)))
+        )
         review_by_day = defaultdict(int)
         comment_by_day = defaultdict(int)
-        start = datetime.now(UTC) - timedelta(days=days - 1)
+        comment_dates = [ensure_utc(comment.comment_created_at or comment.created_at) for comment in raw_comments]
+        if not comment_dates:
+            return []
+
+        start = min(comment_dates)
+        end = max(comment_dates)
+        use_month_buckets = (end.date() - start.date()).days > 62
 
         for comment in raw_comments:
             observed_at = ensure_utc(comment.comment_created_at or comment.created_at)
-            if observed_at >= start:
-                comment_by_day[observed_at.date().isoformat()] += 1
+            comment_by_day[self._trend_bucket(observed_at, use_month_buckets=use_month_buckets)] += 1
 
         for classification in classifications:
-            if classification.needs_human_review and not classification.is_false_positive:
-                observed_at = ensure_utc(classification.created_at)
-                if observed_at >= start:
-                    review_by_day[observed_at.date().isoformat()] += 1
+            if classification.needs_human_review and not classification.is_false_positive and classification.normalized_comment:
+                observed_at = ensure_utc(
+                    classification.normalized_comment.comment_created_at
+                    or classification.normalized_comment.created_at
+                    or classification.created_at
+                )
+                review_by_day[self._trend_bucket(observed_at, use_month_buckets=use_month_buckets)] += 1
 
         points: list[TrendPoint] = []
-        for index in range(days):
-            bucket = (start + timedelta(days=index)).date().isoformat()
+        for bucket in self._trend_buckets_between(start=start, end=end, use_month_buckets=use_month_buckets):
             points.append(
                 TrendPoint(
                     bucket=bucket,
@@ -103,3 +121,37 @@ class DashboardService:
             )
             for signal in self.signal_repository.top(limit)
         ]
+
+    def get_audience_insights(self, *, limit: int = 6) -> AudienceInsightsResponse:
+        return AudienceInsightsService(self.session).get_insights(limit=limit)
+
+    def _date_coverage(self, raw_comments: list[RawComment]) -> tuple[datetime | None, datetime | None, int]:
+        dates = [ensure_utc(comment.comment_created_at or comment.created_at) for comment in raw_comments]
+        if not dates:
+            return None, None, 0
+
+        earliest = min(dates)
+        latest = max(dates)
+        months_represented = len({(value.year, value.month) for value in dates})
+        return earliest, latest, months_represented
+
+    def _trend_bucket(self, observed_at: datetime, *, use_month_buckets: bool) -> str:
+        if use_month_buckets:
+            return observed_at.strftime("%Y-%m")
+        return observed_at.date().isoformat()
+
+    def _trend_buckets_between(self, *, start: datetime, end: datetime, use_month_buckets: bool) -> list[str]:
+        if use_month_buckets:
+            buckets: list[str] = []
+            year = start.year
+            month = start.month
+            while (year, month) <= (end.year, end.month):
+                buckets.append(f"{year:04d}-{month:02d}")
+                month += 1
+                if month > 12:
+                    month = 1
+                    year += 1
+            return buckets
+
+        total_days = (end.date() - start.date()).days + 1
+        return [(start + timedelta(days=index)).date().isoformat() for index in range(total_days)]

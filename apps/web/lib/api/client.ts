@@ -1,12 +1,25 @@
+import { getBrowserApiPrefix, getInternalApiToken, getServerApiBaseUrl } from "@/lib/api/config";
+
 const API_TIMEOUT_MS = 8000;
 
-const fallbackApiBaseUrl =
-  typeof window === "undefined"
-    ? process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
-    : process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8000";
+const fallbackApiBaseUrl = typeof window === "undefined" ? getServerApiBaseUrl() : getBrowserApiPrefix();
 
 function buildUrl(path: string) {
   return `${fallbackApiBaseUrl}${path}`;
+}
+
+function buildHeaders(initHeaders?: HeadersInit) {
+  const headers = new Headers(initHeaders);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (typeof window === "undefined") {
+    const internalApiToken = getInternalApiToken();
+    if (internalApiToken) {
+      headers.set("x-internal-api-token", internalApiToken);
+    }
+  }
+  return headers;
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -19,10 +32,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       cache: "no-store",
       ...init,
       signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        ...(init?.headers ?? {}),
-      },
+      headers: buildHeaders(init?.headers),
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -54,6 +64,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
       method: "POST",
       body: formData,
       signal: controller.signal,
+      headers: typeof window === "undefined" && getInternalApiToken() ? { "x-internal-api-token": getInternalApiToken() } : undefined,
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

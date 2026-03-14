@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 
+import Link from "next/link";
+
 export function PageHeader({
   title,
   description,
@@ -14,6 +16,11 @@ export function PageHeader({
       <p className="text-xs uppercase tracking-[0.24em] text-slate">Internal Admin</p>
       <h2 className="font-display text-3xl font-semibold text-ink">{title}</h2>
       <p className="max-w-3xl text-sm leading-6 text-slate">{description}</p>
+      <div className="pt-1">
+        <Link href="/guide" className="text-sm font-medium text-spruce underline underline-offset-4">
+          Open the step-by-step guide
+        </Link>
+      </div>
     </div>
   );
 }

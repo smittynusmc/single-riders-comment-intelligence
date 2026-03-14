@@ -1,14 +1,17 @@
 import Link from "next/link";
 
+import { InfoTip } from "@/components/help/info-tip";
 import { cn } from "@/lib/utils/cn";
 
 const items = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/imports", label: "Imports" },
-  { href: "/comments", label: "Comments" },
-  { href: "/classifications", label: "Classifications" },
-  { href: "/signals", label: "Signals" },
-  { href: "/review", label: "Review Queue" },
+  { href: "/dashboard", label: "Dashboard", description: "High-level read on comment volume, review pressure, and the biggest audience themes." },
+  { href: "/insights", label: "Audience Insights", description: "Ranks what users care about most for the MVP using grouped evidence, momentum, and story alignment." },
+  { href: "/imports", label: "Imports", description: "Preview TikTok exports, confirm scope, and import approved comment data into the pipeline." },
+  { href: "/comments", label: "Comments", description: "Explore raw evidence, classifications, and audit details behind each imported comment." },
+  { href: "/classifications", label: "Classifications", description: "Inspect AI decisions, approve strong calls, and override weak or incorrect labels." },
+  { href: "/signals", label: "Signals", description: "Review grouped MVP themes and prepare backlog-ready signal summaries." },
+  { href: "/review", label: "Review Queue", description: "Handle ambiguous, safety-sensitive, or low-confidence comments that need human input." },
+  { href: "/guide", label: "Guide", description: "Step-by-step help, glossary notes, and workflow guidance for using the app well." },
 ] as const;
 
 export function Sidebar() {
@@ -23,15 +26,18 @@ export function Sidebar() {
       </div>
       <nav className="space-y-2">
         {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "block rounded-2xl px-4 py-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white",
-            )}
-          >
-            {item.label}
-          </Link>
+          <div key={item.href} className="flex items-center gap-2">
+            <Link
+              href={item.href}
+              title={item.description}
+              className={cn(
+                "block flex-1 rounded-2xl px-4 py-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white",
+              )}
+            >
+              {item.label}
+            </Link>
+            <InfoTip label={`${item.label} help`} description={item.description} />
+          </div>
         ))}
       </nav>
       <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-4">

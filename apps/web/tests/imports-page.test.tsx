@@ -20,6 +20,10 @@ vi.mock("@/lib/api/imports", () => ({
         started_at: null,
         finished_at: null,
         error_message: null,
+        uploaded_by_email: "adam@example.com",
+        source_file_content_type: "application/json",
+        source_file_size_bytes: 2048,
+        source_file_sha256: "sha",
         run_metadata: {},
         created_at: "2026-03-01T00:00:00Z",
         updated_at: "2026-03-01T00:00:00Z",
@@ -38,5 +42,6 @@ describe("ImportsPage", () => {
     expect(screen.getByText("Import History")).toBeInTheDocument();
     expect(screen.getByText("comments.json")).toBeInTheDocument();
     expect(screen.getByText("tiktok json")).toBeInTheDocument();
+    expect(screen.getByText(/uploaded by adam@example.com/i)).toBeInTheDocument();
   });
 });

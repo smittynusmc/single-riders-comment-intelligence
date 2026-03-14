@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, Enum, Integer, String, Text
+from sqlalchemy import DateTime, Enum, Integer, LargeBinary, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
@@ -32,6 +32,11 @@ class IngestionRun(TimestampedModel, Base):
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     error_message: Mapped[str | None] = mapped_column(Text)
+    uploaded_by_email: Mapped[str | None] = mapped_column(String(255))
+    source_file_content_type: Mapped[str | None] = mapped_column(String(255))
+    source_file_size_bytes: Mapped[int | None] = mapped_column(Integer)
+    source_file_sha256: Mapped[str | None] = mapped_column(String(64))
+    source_file_blob: Mapped[bytes | None] = mapped_column(LargeBinary)
     run_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
 
     raw_comments: Mapped[list["RawComment"]] = relationship(back_populates="ingestion_run")

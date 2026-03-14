@@ -31,6 +31,32 @@ vi.mock("@/lib/api/signals", () => ({
   }),
 }));
 
+vi.mock("@/lib/api/dashboard", () => ({
+  getAudienceInsights: vi.fn().mockResolvedValue({
+    mvp_priorities: [
+      {
+        key: "park_day_coordination",
+        label: "Park-Day Coordination",
+        summary: "Same-day planning demand is rising.",
+        story_anchor: "Supports meetup planning stories.",
+        evidence_count: 7,
+        weighted_score: 84.2,
+        recent_evidence_count: 3,
+        momentum: 42.8,
+        trend_label: "Rising",
+        mvp_area: "meetups",
+        primary_category: "social_coordination",
+        sample_comments: ["Need same-day meetup planning"],
+      },
+    ],
+    user_concerns: [],
+    confusion_points: [],
+    positive_validation: [],
+    story_alignment: [],
+    top_videos: [],
+  }),
+}));
+
 describe("SignalsPage", () => {
   it("renders signal cards from API data", async () => {
     render(await SignalsPage());
@@ -38,5 +64,6 @@ describe("SignalsPage", () => {
     expect(screen.getByText("Signals")).toBeInTheDocument();
     expect(screen.getByText("Meetups: repeated meetup signal")).toBeInTheDocument();
     expect(screen.getByText("Export GitHub")).toBeInTheDocument();
+    expect(screen.getByText("Audience Priorities Beside The Signal Queue")).toBeInTheDocument();
   });
 });

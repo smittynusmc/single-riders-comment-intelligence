@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.enums import ImportFormat, IngestionSourceType, IngestionStatus, SourcePlatform
 from app.schemas.common import ORMModel
@@ -30,6 +30,11 @@ class ImportPreviewResponse(BaseModel):
     detected_format: ImportFormat
     detected_shape: str | None = None
     comment_count: int
+    earliest_comment_date: datetime | None = None
+    latest_comment_date: datetime | None = None
+    months_represented: int = 0
+    sections_detected: list[str] = Field(default_factory=list)
+    sections_ignored: list[str] = Field(default_factory=list)
     sample_fields: list[str]
     missing_fields: list[str]
     parse_warnings: list[str]
@@ -50,6 +55,10 @@ class IngestionRunRead(ORMModel):
     started_at: datetime | None
     finished_at: datetime | None
     error_message: str | None
+    uploaded_by_email: str | None
+    source_file_content_type: str | None
+    source_file_size_bytes: int | None
+    source_file_sha256: str | None
     run_metadata: dict[str, Any]
     created_at: datetime
     updated_at: datetime

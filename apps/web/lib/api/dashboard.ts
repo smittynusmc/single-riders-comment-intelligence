@@ -1,4 +1,4 @@
-import type { DashboardSummary, TopSignalSummary, TrendPoint } from "@single-riders/shared-types";
+import type { AudienceInsights, DashboardSummary, TopSignalSummary, TrendPoint } from "@single-riders/shared-types";
 
 import { apiFetch } from "@/lib/api/client";
 
@@ -12,4 +12,8 @@ export function getDashboardTrends() {
 
 export function getTopSignals() {
   return apiFetch<TopSignalSummary[]>("/dashboard/top-signals");
+}
+
+export function getAudienceInsights() {
+  return apiFetch<AudienceInsights>("/dashboard/audience-insights");
 }

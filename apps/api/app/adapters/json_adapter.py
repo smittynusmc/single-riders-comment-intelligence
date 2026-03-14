@@ -164,6 +164,28 @@ class TikTokJsonImportAdapter(BaseIngestionAdapter):
                         ),
                     )
 
+        comment_payload = payload.get("Comment") if isinstance(payload.get("Comment"), dict) else payload.get("comment")
+        if isinstance(comment_payload, dict):
+            comments_wrapper = comment_payload.get("Comments") or comment_payload.get("comments")
+            if isinstance(comments_wrapper, dict):
+                portability_records = (
+                    comments_wrapper.get("CommentsList")
+                    or comments_wrapper.get("comments_list")
+                    or comments_wrapper.get("comments")
+                )
+                if isinstance(portability_records, list):
+                    records = [item for item in portability_records if isinstance(item, dict)]
+                    if records:
+                        return JsonPayloadInspection(
+                            import_format=ImportFormat.PORTABILITY_JSON,
+                            detected_shape="comment.comments.comments_list",
+                            records=records,
+                            parse_warnings=self._skipped_item_warnings(
+                                total_items=len(portability_records),
+                                parsed_items=len(records),
+                            ),
+                        )
+
         for field_name, shape in (("comments", "comments_array"), ("comment_list", "comment_list"), ("Comments", "comments_array")):
             rows = payload.get(field_name)
             if isinstance(rows, list):
@@ -179,7 +201,7 @@ class TikTokJsonImportAdapter(BaseIngestionAdapter):
 
         raise ValueError(
             "Unsupported TikTok JSON shape. Expected a comments array, portability Activity -> Comments wrapper, "
-            "or a top-level array of comment objects."
+            "TikTok portability Comment -> Comments -> CommentsList wrapper, or a top-level array of comment objects."
         )
 
     def _load_json(self, file_content: bytes | str | BinaryIO) -> Any:

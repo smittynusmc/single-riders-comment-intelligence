@@ -77,6 +77,10 @@ export interface IngestionRun {
   started_at: string | null;
   finished_at: string | null;
   error_message: string | null;
+  uploaded_by_email: string | null;
+  source_file_content_type: string | null;
+  source_file_size_bytes: number | null;
+  source_file_sha256: string | null;
   run_metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -217,15 +221,53 @@ export interface BreakdownItem {
   count: number;
 }
 
+export interface VideoInsightItem {
+  key: string;
+  label: string;
+  comment_count: number;
+  average_priority_score: number;
+  top_theme: string | null;
+}
+
+export interface AudienceThemeInsight {
+  key: string;
+  label: string;
+  summary: string;
+  story_anchor: string;
+  evidence_count: number;
+  weighted_score: number;
+  recent_evidence_count: number;
+  momentum: number;
+  trend_label: string;
+  mvp_area: MvpArea | null;
+  primary_category: PrimaryCategory | null;
+  sample_comments: string[];
+}
+
+export interface AudienceInsights {
+  mvp_priorities: AudienceThemeInsight[];
+  user_concerns: AudienceThemeInsight[];
+  confusion_points: AudienceThemeInsight[];
+  positive_validation: AudienceThemeInsight[];
+  story_alignment: AudienceThemeInsight[];
+  top_videos: VideoInsightItem[];
+}
+
 export interface DashboardSummary {
   total_comments: number;
   comments_this_week: number;
   needs_review_count: number;
   total_signals: number;
+  earliest_comment_date: string | null;
+  latest_comment_date: string | null;
+  months_represented: number;
   top_categories: BreakdownItem[];
   top_mvp_areas: BreakdownItem[];
   top_repeated_requests: BreakdownItem[];
   top_safety_concerns: BreakdownItem[];
+  top_user_concerns: BreakdownItem[];
+  top_confusion_points: BreakdownItem[];
+  top_positive_validation: BreakdownItem[];
 }
 
 export interface TrendPoint {
@@ -254,6 +296,11 @@ export interface ImportPreview {
   detected_format: ImportFormat;
   detected_shape: string | null;
   comment_count: number;
+  earliest_comment_date: string | null;
+  latest_comment_date: string | null;
+  months_represented: number;
+  sections_detected: string[];
+  sections_ignored: string[];
   sample_fields: string[];
   missing_fields: string[];
   parse_warnings: string[];
