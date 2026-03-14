@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { ApiRequestError } from "@/lib/api/client";
-import { getTopSignals } from "@/lib/api/dashboard";
+import { getDashboardTrends, getTopSignals } from "@/lib/api/dashboard";
 
 vi.mock("@/lib/api/client", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api/client")>("@/lib/api/client");
@@ -59,5 +59,15 @@ describe("getTopSignals", () => {
       },
     ]);
     expect(getSignals).toHaveBeenCalledWith({ limit: 5 });
+  });
+});
+
+describe("getDashboardTrends", () => {
+  it("falls back to an empty trend set when dashboard/trends is unavailable", async () => {
+    const { apiFetch } = await import("@/lib/api/client");
+
+    vi.mocked(apiFetch).mockRejectedValueOnce(new ApiRequestError("/dashboard/trends", 404));
+
+    await expect(getDashboardTrends()).resolves.toEqual([]);
   });
 });

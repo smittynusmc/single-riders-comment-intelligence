@@ -7,8 +7,16 @@ export function getDashboardSummary() {
   return apiFetch<DashboardSummary>("/dashboard/summary");
 }
 
-export function getDashboardTrends() {
-  return apiFetch<TrendPoint[]>("/dashboard/trends");
+export async function getDashboardTrends() {
+  try {
+    return await apiFetch<TrendPoint[]>("/dashboard/trends");
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 404) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 export async function getTopSignals() {
