@@ -86,6 +86,8 @@ SCI_LLM_PROVIDER=stub
 SCI_LLM_MODEL=single-riders-comment-intelligence-v1
 ```
 
+The API also normalizes plain `postgresql://...` and `postgres://...` URLs to the `psycopg` driver automatically, so Railway-style Postgres URLs work without manual rewriting.
+
 ## Vercel setup
 
 1. Create a new Vercel project from this repository.

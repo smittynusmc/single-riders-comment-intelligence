@@ -27,6 +27,19 @@ class Settings(BaseSettings):
     trello_board_id: str | None = None
     docs_export_path: str = "../../docs/exports"
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, value: str) -> str:
+        if not value:
+            return value
+
+        normalized = value.strip()
+        if normalized.startswith("postgres://"):
+            return f"postgresql+psycopg://{normalized.removeprefix('postgres://')}"
+        if normalized.startswith("postgresql://") and "://" in normalized and "+" not in normalized.split("://", 1)[0]:
+            return f"postgresql+psycopg://{normalized.removeprefix('postgresql://')}"
+        return normalized
+
     @field_validator("allowed_origins", mode="before")
     @classmethod
     def parse_allowed_origins(cls, value: str | list[str]) -> list[str]:
