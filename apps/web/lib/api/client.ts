@@ -2,6 +2,18 @@ import { getBrowserApiPrefix, getInternalApiToken, getServerApiBaseUrl } from "@
 
 const API_TIMEOUT_MS = 8000;
 
+export class ApiRequestError extends Error {
+  status: number;
+  path: string;
+
+  constructor(path: string, status: number) {
+    super(`API request failed for ${path}: ${status}`);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.path = path;
+  }
+}
+
 const fallbackApiBaseUrl = typeof window === "undefined" ? getServerApiBaseUrl() : getBrowserApiPrefix();
 
 function buildUrl(path: string) {
@@ -44,7 +56,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   }
 
   if (!response.ok) {
-    throw new Error(`API request failed for ${path}: ${response.status}`);
+    throw new ApiRequestError(path, response.status);
   }
 
   if (response.status === 204) {
@@ -76,7 +88,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   }
 
   if (!response.ok) {
-    throw new Error(`Upload failed for ${path}: ${response.status}`);
+    throw new ApiRequestError(path, response.status);
   }
 
   return (await response.json()) as T;
