@@ -1,4 +1,14 @@
+import { Suspense } from "react";
+
 import { LoginForm } from "@/components/auth/login-form";
+
+function LoginFallback() {
+  return (
+    <div className="mx-auto max-w-xl rounded-[2rem] border border-white/70 bg-white/80 px-6 py-10 text-center shadow-panel backdrop-blur">
+      <p className="text-sm text-slate">Loading secure login...</p>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   return (
@@ -11,7 +21,9 @@ export default function LoginPage() {
             Hosted on Vercel and Railway for the internal Single Riders team. Sign in to review shared imports, audience signals, and roadmap evidence.
           </p>
         </div>
-        <LoginForm />
+        <Suspense fallback={<LoginFallback />}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );
