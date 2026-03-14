@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 revision = "0001_initial"
@@ -16,7 +17,11 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-source_platform = sa.Enum(
+def pg_enum(*values: str, name: str) -> postgresql.ENUM:
+    return postgresql.ENUM(*values, name=name, create_type=False)
+
+
+source_platform = pg_enum(
     "tiktok",
     "instagram",
     "discord",
@@ -26,7 +31,7 @@ source_platform = sa.Enum(
     "unknown",
     name="sourceplatform",
 )
-ingestion_source_type = sa.Enum(
+ingestion_source_type = pg_enum(
     "json_upload",
     "csv_upload",
     "manual_paste",
@@ -35,7 +40,7 @@ ingestion_source_type = sa.Enum(
     "connector_placeholder",
     name="ingestionsourcetype",
 )
-import_format = sa.Enum(
+import_format = pg_enum(
     "tiktok_json",
     "csv",
     "research_api_json",
@@ -44,9 +49,9 @@ import_format = sa.Enum(
     "third_party_export",
     name="importformat",
 )
-ingestion_status = sa.Enum("pending", "imported", "processing", "completed", "failed", name="ingestionstatus")
-normalization_status = sa.Enum("pending", "normalized", "skipped_duplicate", "failed", name="normalizationstatus")
-classification_status = sa.Enum(
+ingestion_status = pg_enum("pending", "imported", "processing", "completed", "failed", name="ingestionstatus")
+normalization_status = pg_enum("pending", "normalized", "skipped_duplicate", "failed", name="normalizationstatus")
+classification_status = pg_enum(
     "pending",
     "classified",
     "needs_review",
@@ -54,8 +59,8 @@ classification_status = sa.Enum(
     "false_positive",
     name="classificationstatus",
 )
-signal_status = sa.Enum("active", "reviewed", "archived", name="signalstatus")
-primary_category = sa.Enum(
+signal_status = pg_enum("active", "reviewed", "archived", name="signalstatus")
+primary_category = pg_enum(
     "feature_request",
     "bug_or_quality",
     "safety_or_trust",
@@ -67,7 +72,7 @@ primary_category = sa.Enum(
     "other",
     name="primarycategory",
 )
-mvp_area = sa.Enum(
+mvp_area = pg_enum(
     "matching",
     "meetups",
     "safety",
@@ -82,7 +87,7 @@ mvp_area = sa.Enum(
     "other",
     name="mvparea",
 )
-sentiment_label = sa.Enum("positive", "neutral", "negative", "mixed", name="sentimentlabel")
+sentiment_label = pg_enum("positive", "neutral", "negative", "mixed", name="sentimentlabel")
 
 
 def upgrade() -> None:
