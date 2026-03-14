@@ -36,7 +36,7 @@ Set these on the Vercel project for `apps/web`:
 - `AUTH_SHARED_ACCESS_CODE`
   - The internal shared access code your allowlisted users enter at login
 - `AUTH_ALLOWED_USER_EMAILS`
-  - Comma-separated allowlist of real user emails for Adam, Joe, Kiele, and Jason
+  - Comma-separated allowlist of the real internal email addresses that should have access
 
 Example:
 
@@ -46,7 +46,7 @@ API_BASE_URL=https://single-riders-api.up.railway.app
 INTERNAL_API_TOKEN=use-a-long-random-token
 AUTH_SESSION_SECRET=use-a-different-long-random-secret
 AUTH_SHARED_ACCESS_CODE=single-riders-internal-2026
-AUTH_ALLOWED_USER_EMAILS=adam@yourdomain.com,joe@yourdomain.com,kiele@yourdomain.com,jason@yourdomain.com
+AUTH_ALLOWED_USER_EMAILS=smittynusmc@gmail.com,schnecklothkiele@gmail.com,joseph.lastoria@gmail.com,joethebeardednerd@gmail.com,adam.a.tucker@outlook.com,singleridersofficial01@gmail.com
 ```
 
 ### Railway backend
@@ -117,7 +117,7 @@ Notes:
 There is no separate seeded admin table in phase 1.
 
 - All access is controlled by `AUTH_ALLOWED_USER_EMAILS`.
-- Add the real email addresses for Adam, Joe, Kiele, and Jason to that allowlist.
+- Add the real internal email addresses you want to admit to that allowlist.
 - All allowlisted users currently have the same internal admin privileges.
 
 If you want to add or remove users later, update `AUTH_ALLOWED_USER_EMAILS` and redeploy Vercel.
@@ -129,7 +129,7 @@ Use real email addresses, not first names.
 Good:
 
 ```env
-AUTH_ALLOWED_USER_EMAILS=adam@yourdomain.com,joe@yourdomain.com,kiele@yourdomain.com,jason@yourdomain.com
+AUTH_ALLOWED_USER_EMAILS=smittynusmc@gmail.com,schnecklothkiele@gmail.com,joseph.lastoria@gmail.com,joethebeardednerd@gmail.com,adam.a.tucker@outlook.com,singleridersofficial01@gmail.com
 ```
 
 Avoid:
