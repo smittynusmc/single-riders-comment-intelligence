@@ -3,7 +3,7 @@ from __future__ import annotations
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, inspect, pool, text
 
 from app.core.config import get_settings
 import app.db.base  # noqa: F401
@@ -17,6 +17,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+LEGACY_REVISION_ALIASES = {
+    "0002_hosted_deployment_ingestion_artifacts": "0002_hosted_ingestion_artifacts",
+}
 
 
 def run_migrations_offline() -> None:
@@ -39,6 +43,16 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        if inspect(connection).has_table("alembic_version"):
+            current_revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one_or_none()
+            replacement_revision = LEGACY_REVISION_ALIASES.get(current_revision)
+            if replacement_revision:
+                connection.execute(
+                    text("UPDATE alembic_version SET version_num = :replacement_revision WHERE version_num = :current_revision"),
+                    {"replacement_revision": replacement_revision, "current_revision": current_revision},
+                )
+                connection.commit()
+
         context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
 
         with context.begin_transaction():

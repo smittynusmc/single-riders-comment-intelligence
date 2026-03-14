@@ -1,6 +1,6 @@
 """add hosted deployment ingestion artifact fields
 
-Revision ID: 0002_hosted_deployment_ingestion_artifacts
+Revision ID: 0002_hosted_ingestion_artifacts
 Revises: 0001_initial
 Create Date: 2026-03-14 18:20:00
 """
@@ -11,7 +11,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0002_hosted_deployment_ingestion_artifacts"
+revision = "0002_hosted_ingestion_artifacts"
 down_revision = "0001_initial"
 branch_labels = None
 depends_on = None
@@ -31,4 +31,3 @@ def downgrade() -> None:
     op.drop_column("ingestion_runs", "source_file_size_bytes")
     op.drop_column("ingestion_runs", "source_file_content_type")
     op.drop_column("ingestion_runs", "uploaded_by_email")
-
