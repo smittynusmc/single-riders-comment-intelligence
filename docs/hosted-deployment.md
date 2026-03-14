@@ -110,8 +110,9 @@ Notes:
 
 Notes:
 
-- [Procfile](/c:/single-riders-comment-intelligence/apps/api/Procfile) runs `alembic upgrade head` before starting `uvicorn`.
+- [Procfile](/c:/single-riders-comment-intelligence/apps/api/Procfile) runs `python -m alembic upgrade head` before starting `python -m uvicorn`, which keeps the `apps/api` workspace on the module path in Railway containers.
 - [requirements.txt](/c:/single-riders-comment-intelligence/apps/api/requirements.txt) is included for Railpack compatibility because this workspace uses a plain setuptools `pyproject.toml` rather than Poetry, PDM, `uv`, or Pipenv.
+- [alembic.ini](/c:/single-riders-comment-intelligence/apps/api/alembic.ini) sets `prepend_sys_path = .` so migrations can import the `app` package when the service boots in Railway.
 - The hosted-first path uses `SCI_WORKER_MODE=inline`, so you do not need a separate worker service for the initial internal deployment.
 
 If Railway logs show `sh: 1: alembic: not found`, the service is starting without dependencies installed. Recheck that:
