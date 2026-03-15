@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, Text, Uuid, UniqueConstraint
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, Uuid, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
-from app.models.base import Base, TimestampedModel
+from app.models.base import Base, TimestampedModel, value_enum
 from app.models.enums import MvpArea, PrimaryCategory, SignalStatus
 
 
@@ -19,9 +19,16 @@ class MvpSignal(TimestampedModel, Base):
     fingerprint: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
-    mvp_area: Mapped[MvpArea] = mapped_column(Enum(MvpArea), nullable=False)
-    primary_category: Mapped[PrimaryCategory] = mapped_column(Enum(PrimaryCategory), nullable=False)
-    status: Mapped[SignalStatus] = mapped_column(Enum(SignalStatus), nullable=False, default=SignalStatus.ACTIVE)
+    mvp_area: Mapped[MvpArea] = mapped_column(value_enum(MvpArea, name="mvparea"), nullable=False)
+    primary_category: Mapped[PrimaryCategory] = mapped_column(
+        value_enum(PrimaryCategory, name="primarycategory"),
+        nullable=False,
+    )
+    status: Mapped[SignalStatus] = mapped_column(
+        value_enum(SignalStatus, name="signalstatus"),
+        nullable=False,
+        default=SignalStatus.ACTIVE,
+    )
     evidence_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     priority_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     first_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

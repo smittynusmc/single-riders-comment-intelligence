@@ -2,13 +2,28 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import Enum as PythonEnum
+from typing import TypeVar
 
-from sqlalchemy import DateTime, Uuid, func
+from sqlalchemy import DateTime, Enum as SqlEnum, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+EnumT = TypeVar("EnumT", bound=PythonEnum)
 
 
 class Base(DeclarativeBase):
     """Declarative base for all ORM models."""
+
+
+def value_enum(enum_cls: type[EnumT], *, name: str) -> SqlEnum:
+    """Persist enum values so ORM labels match the PostgreSQL enum definitions."""
+
+    return SqlEnum(
+        enum_cls,
+        name=name,
+        values_callable=lambda members: [member.value for member in members],
+        validate_strings=True,
+    )
 
 
 class TimestampedModel:

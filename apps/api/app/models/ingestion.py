@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, Enum, Integer, LargeBinary, String, Text
+from sqlalchemy import DateTime, Integer, LargeBinary, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
-from app.models.base import Base, TimestampedModel
+from app.models.base import Base, TimestampedModel, value_enum
 from app.models.enums import ImportFormat, IngestionSourceType, IngestionStatus, SourcePlatform
 
 
@@ -16,12 +16,21 @@ class IngestionRun(TimestampedModel, Base):
 
     __tablename__ = "ingestion_runs"
 
-    source_type: Mapped[IngestionSourceType] = mapped_column(Enum(IngestionSourceType), nullable=False)
-    source_platform: Mapped[SourcePlatform] = mapped_column(Enum(SourcePlatform), nullable=False)
-    import_format: Mapped[ImportFormat] = mapped_column(Enum(ImportFormat), nullable=False)
+    source_type: Mapped[IngestionSourceType] = mapped_column(
+        value_enum(IngestionSourceType, name="ingestionsourcetype"),
+        nullable=False,
+    )
+    source_platform: Mapped[SourcePlatform] = mapped_column(
+        value_enum(SourcePlatform, name="sourceplatform"),
+        nullable=False,
+    )
+    import_format: Mapped[ImportFormat] = mapped_column(
+        value_enum(ImportFormat, name="importformat"),
+        nullable=False,
+    )
     source_label: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[IngestionStatus] = mapped_column(
-        Enum(IngestionStatus),
+        value_enum(IngestionStatus, name="ingestionstatus"),
         nullable=False,
         default=IngestionStatus.PENDING,
     )

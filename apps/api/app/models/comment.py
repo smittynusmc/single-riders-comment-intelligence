@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, Uuid, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
-from app.models.base import Base, TimestampedModel
+from app.models.base import Base, TimestampedModel, value_enum
 from app.models.enums import ClassificationStatus, NormalizationStatus, SourcePlatform
 
 
@@ -17,7 +17,10 @@ class RawComment(TimestampedModel, Base):
     __tablename__ = "raw_comments"
 
     ingestion_run_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("ingestion_runs.id"), nullable=False)
-    source_platform: Mapped[SourcePlatform] = mapped_column(Enum(SourcePlatform), nullable=False)
+    source_platform: Mapped[SourcePlatform] = mapped_column(
+        value_enum(SourcePlatform, name="sourceplatform"),
+        nullable=False,
+    )
     source_video_id: Mapped[str | None] = mapped_column(String(255))
     source_comment_id: Mapped[str] = mapped_column(String(255), nullable=False)
     source_parent_comment_id: Mapped[str | None] = mapped_column(String(255))
@@ -42,7 +45,10 @@ class NormalizedComment(TimestampedModel, Base):
 
     raw_comment_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("raw_comments.id"), nullable=False, unique=True)
     ingestion_run_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("ingestion_runs.id"), nullable=False)
-    source_platform: Mapped[SourcePlatform] = mapped_column(Enum(SourcePlatform), nullable=False)
+    source_platform: Mapped[SourcePlatform] = mapped_column(
+        value_enum(SourcePlatform, name="sourceplatform"),
+        nullable=False,
+    )
     source_video_id: Mapped[str | None] = mapped_column(String(255))
     source_comment_id: Mapped[str] = mapped_column(String(255), nullable=False)
     source_parent_comment_id: Mapped[str | None] = mapped_column(String(255))
@@ -53,12 +59,12 @@ class NormalizedComment(TimestampedModel, Base):
     like_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     reply_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     normalization_status: Mapped[NormalizationStatus] = mapped_column(
-        Enum(NormalizationStatus),
+        value_enum(NormalizationStatus, name="normalizationstatus"),
         nullable=False,
         default=NormalizationStatus.PENDING,
     )
     classification_status: Mapped[ClassificationStatus] = mapped_column(
-        Enum(ClassificationStatus),
+        value_enum(ClassificationStatus, name="classificationstatus"),
         nullable=False,
         default=ClassificationStatus.PENDING,
     )
