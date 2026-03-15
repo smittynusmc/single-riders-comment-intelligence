@@ -25,6 +25,10 @@ function formatLabel(value: string) {
 }
 
 function formatUploadError(error: unknown, action: "preview" | "import") {
+  if (error instanceof ApiRequestError && error.detail) {
+    return error.detail;
+  }
+
   if (error instanceof ApiRequestError && error.status === 404) {
     const actionLabel = action === "preview" ? "Preview" : "Import";
     return `${actionLabel} is temporarily unavailable because the hosted API returned 404 for the ${action} endpoint. The page is still live, but Vercel and Railway may not be on the same deploy yet.`;

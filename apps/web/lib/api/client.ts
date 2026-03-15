@@ -5,12 +5,34 @@ const API_TIMEOUT_MS = 8000;
 export class ApiRequestError extends Error {
   status: number;
   path: string;
+  detail?: string;
 
-  constructor(path: string, status: number) {
-    super(`API request failed for ${path}: ${status}`);
+  constructor(path: string, status: number, detail?: string) {
+    super(detail ? `API request failed for ${path}: ${status} - ${detail}` : `API request failed for ${path}: ${status}`);
     this.name = "ApiRequestError";
     this.status = status;
     this.path = path;
+    this.detail = detail;
+  }
+}
+
+async function readErrorDetail(response: Response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    try {
+      const payload = (await response.json()) as { detail?: string; message?: string };
+      return payload.detail ?? payload.message;
+    } catch {
+      return undefined;
+    }
+  }
+
+  try {
+    const text = await response.text();
+    return text || undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -56,7 +78,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   }
 
   if (!response.ok) {
-    throw new ApiRequestError(path, response.status);
+    throw new ApiRequestError(path, response.status, await readErrorDetail(response));
   }
 
   if (response.status === 204) {
@@ -88,7 +110,7 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   }
 
   if (!response.ok) {
-    throw new ApiRequestError(path, response.status);
+    throw new ApiRequestError(path, response.status, await readErrorDetail(response));
   }
 
   return (await response.json()) as T;

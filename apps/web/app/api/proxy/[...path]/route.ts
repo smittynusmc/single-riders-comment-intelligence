@@ -48,13 +48,27 @@ async function proxyRequest(request: NextRequest, pathSegments: string[]) {
     cache: "no-store",
   });
 
+  const upstreamBody = await upstreamResponse.arrayBuffer();
+  console.info(
+    `[proxy] ${request.method} ${request.nextUrl.pathname}${request.nextUrl.search} -> ${upstreamUrl.toString()} status=${upstreamResponse.status}`,
+  );
+
+  if (!upstreamResponse.ok && upstreamResponse.status === 404) {
+    return NextResponse.json(
+      {
+        detail: `The hosted API returned 404 for ${upstreamUrl.pathname}. Check that Railway is deployed to the latest backend code and that Vercel API_BASE_URL points to the correct Railway service.`,
+      },
+      { status: 404 },
+    );
+  }
+
   const responseHeaders = new Headers();
   const upstreamContentType = upstreamResponse.headers.get("content-type");
   if (upstreamContentType) {
     responseHeaders.set("content-type", upstreamContentType);
   }
 
-  return new NextResponse(await upstreamResponse.arrayBuffer(), {
+  return new NextResponse(upstreamBody, {
     status: upstreamResponse.status,
     headers: responseHeaders,
   });
