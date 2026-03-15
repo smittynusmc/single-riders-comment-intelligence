@@ -50,10 +50,12 @@ describe("ImportsPage", () => {
     vi.mocked(getImports).mockResolvedValueOnce({
       items: [],
       meta: { total: 0, limit: 20, offset: 0 },
+      warning: "Import history is temporarily unavailable because the hosted API returned 404 for the imports list endpoint.",
     });
 
     render(await ImportsPage());
 
+    expect(screen.getByText(/some data could not be loaded/i)).toBeInTheDocument();
     expect(screen.getByText(/no imports have been recorded yet/i)).toBeInTheDocument();
   });
 });

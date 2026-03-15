@@ -1,3 +1,4 @@
+import { DataWarningNotice } from "@/components/feedback/data-warning-notice";
 import { PageHeader } from "@/components/layout/page-header";
 import { ReviewQueueTable } from "@/components/review/review-queue-table";
 import { getClassifications } from "@/lib/api/classifications";
@@ -13,6 +14,7 @@ export default async function ReviewQueuePage() {
         title="Human Review Queue"
         description="Handle ambiguous, safety-sensitive, or moderation-related comments that should not flow directly into the backlog without human confirmation."
       />
+      {response.warning ? <DataWarningNotice message={response.warning} /> : null}
       <ReviewQueueTable items={response.items} />
     </div>
   );

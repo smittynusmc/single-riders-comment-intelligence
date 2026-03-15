@@ -1,3 +1,4 @@
+import { DataWarningNotice } from "@/components/feedback/data-warning-notice";
 import { PageHeader } from "@/components/layout/page-header";
 import { MvpPriorityPanel } from "@/components/dashboard/mvp-priority-panel";
 import { SignalFilters } from "@/components/signals/signal-filters";
@@ -24,12 +25,19 @@ export default async function SignalsPage() {
         description="Use this ranking to sanity-check whether grouped signals reflect the biggest launch themes from comments and user stories."
         items={audienceInsights.mvp_priorities.slice(0, 3)}
       />
+      {response.warning ? <DataWarningNotice message={response.warning} /> : null}
       <SignalFilters />
-      <div className="grid gap-6 xl:grid-cols-2">
-        {response.items.map((signal) => (
-          <SignalCard key={signal.id} signal={signal} />
-        ))}
-      </div>
+      {response.items.length ? (
+        <div className="grid gap-6 xl:grid-cols-2">
+          {response.items.map((signal) => (
+            <SignalCard key={signal.id} signal={signal} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-dashed border-ink/15 bg-sand/45 px-6 py-10 text-sm text-slate">
+          No signals are available yet. Import comments and let the classification pipeline finish to populate this queue.
+        </div>
+      )}
     </div>
   );
 }

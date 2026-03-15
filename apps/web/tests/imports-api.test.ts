@@ -20,6 +20,7 @@ describe("getImports", () => {
     await expect(getImports({ limit: 20 })).resolves.toEqual({
       items: [],
       meta: { total: 0, limit: 20, offset: 0 },
+      warning: "Import history is temporarily unavailable because the hosted API returned 404 for the imports list endpoint.",
     });
   });
 });

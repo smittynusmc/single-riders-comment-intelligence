@@ -1,6 +1,7 @@
 import { CommentFilters } from "@/components/comments/comment-filters";
 import { CommentsTable } from "@/components/comments/comments-table";
 import { DateRangeIndicator, formatActiveFilterRange } from "@/components/coverage/date-range-indicator";
+import { DataWarningNotice } from "@/components/feedback/data-warning-notice";
 import { ActiveFilterPills, type ActiveFilterPill } from "@/components/filters/active-filter-pills";
 import { PageHeader } from "@/components/layout/page-header";
 import { getComments } from "@/lib/api/comments";
@@ -90,6 +91,7 @@ export default async function CommentsPage({
         activeFilterRange={activeFilterRange}
         resultSummary={resultSummary}
       />
+      {response.warning ? <DataWarningNotice message={response.warning} /> : null}
       <ActiveFilterPills pills={activeFilterPills} resetHref="/comments" />
       <CommentFilters values={params} />
       <CommentsTable items={response.items} emptyMessage={emptyMessage} />

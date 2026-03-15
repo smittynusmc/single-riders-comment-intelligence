@@ -5,12 +5,13 @@ import { useId, useState, useTransition } from "react";
 import type { ImportFormat, ImportPreview } from "@single-riders/shared-types";
 
 import { previewImport } from "@/lib/api/imports";
-import { apiUpload } from "@/lib/api/client";
+import { ApiRequestError, apiUpload } from "@/lib/api/client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImportSummaryCard } from "@/components/imports/import-summary-card";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils/cn";
 
 function inferImportEndpoint(fileName: string, detectedFormat?: ImportFormat) {
   if (detectedFormat === "csv" || fileName.toLowerCase().endsWith(".csv")) {
@@ -21,6 +22,15 @@ function inferImportEndpoint(fileName: string, detectedFormat?: ImportFormat) {
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function formatUploadError(error: unknown, action: "preview" | "import") {
+  if (error instanceof ApiRequestError && error.status === 404) {
+    const actionLabel = action === "preview" ? "Preview" : "Import";
+    return `${actionLabel} is temporarily unavailable because the hosted API returned 404 for the ${action} endpoint. The page is still live, but Vercel and Railway may not be on the same deploy yet.`;
+  }
+
+  return error instanceof Error ? error.message : "The request could not be completed.";
 }
 
 function PreviewList({ items }: { items: string[] }) {
@@ -42,6 +52,7 @@ function PreviewList({ items }: { items: string[] }) {
 export function ImportUploadForm() {
   const inputId = useId();
   const [message, setMessage] = useState<string | null>(null);
+  const [messageTone, setMessageTone] = useState<"success" | "error">("success");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [isPreviewPending, startPreviewTransition] = useTransition();
@@ -51,6 +62,7 @@ export function ImportUploadForm() {
     setSelectedFile(file);
     setPreview(null);
     setMessage(null);
+    setMessageTone("success");
 
     if (!file) {
       return;
@@ -64,7 +76,8 @@ export function ImportUploadForm() {
         setPreview(result);
       } catch (error) {
         setPreview(null);
-        setMessage(error instanceof Error ? error.message : "Could not preview the file.");
+        setMessageTone("error");
+        setMessage(formatUploadError(error, "preview"));
       }
     });
   }
@@ -85,6 +98,7 @@ export function ImportUploadForm() {
           onSubmit={(event) => {
             event.preventDefault();
             if (!selectedFile) {
+              setMessageTone("error");
               setMessage("Choose a JSON or CSV export file first.");
               return;
             }
@@ -95,10 +109,12 @@ export function ImportUploadForm() {
                 formData.set("file", selectedFile);
                 const endpoint = inferImportEndpoint(selectedFile.name, preview?.detected_format);
                 const response = await apiUpload<{ ingestion_run_id: string }>(endpoint, formData);
+                setMessageTone("success");
                 setMessage(`Import queued for run ${response.ingestion_run_id}.`);
                 window.location.reload();
               } catch (error) {
-                setMessage(error instanceof Error ? error.message : "Upload failed.");
+                setMessageTone("error");
+                setMessage(formatUploadError(error, "import"));
               }
             });
           }}
@@ -208,7 +224,16 @@ export function ImportUploadForm() {
           <Button type="submit" disabled={!selectedFile || isImportPending || isPreviewPending}>
             {isImportPending ? "Uploading..." : "Import File"}
           </Button>
-          {message ? <p className="text-sm text-slate">{message}</p> : null}
+          {message ? (
+            <div
+              className={cn(
+                "rounded-2xl px-4 py-3 text-sm",
+                messageTone === "error" ? "border border-coral/30 bg-coral/10 text-ink" : "border border-spruce/20 bg-spruce/10 text-ink",
+              )}
+            >
+              {message}
+            </div>
+          ) : null}
         </form>
       </CardContent>
     </Card>

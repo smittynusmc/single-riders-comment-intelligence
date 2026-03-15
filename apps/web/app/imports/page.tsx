@@ -1,3 +1,4 @@
+import { DataWarningNotice } from "@/components/feedback/data-warning-notice";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImportUploadForm } from "@/components/imports/csv-upload-form";
 import { ImportHistoryTable } from "@/components/imports/import-history-table";
@@ -14,6 +15,7 @@ export default async function ImportsPage() {
         title="Imports"
         description="Preview TikTok JSON exports before import, or fall back to CSV for cleaned manual datasets."
       />
+      {history.warning ? <DataWarningNotice message={history.warning} /> : null}
       <div className="grid gap-6 xl:grid-cols-[1fr,1.4fr]">
         <ImportUploadForm />
         <ImportHistoryTable runs={history.items} />

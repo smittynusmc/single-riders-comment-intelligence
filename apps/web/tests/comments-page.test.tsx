@@ -7,6 +7,7 @@ vi.mock("@/lib/api/comments", () => ({
   getComments: vi.fn().mockResolvedValue({
     items: Array.from({ length: 84 }, () => ({})),
     meta: { total: 84, limit: 100, offset: 0 },
+    warning: undefined,
   }),
 }));
 

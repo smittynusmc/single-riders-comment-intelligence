@@ -93,6 +93,11 @@ export function ClassificationTable({ items }: { items: ClassificationReviewItem
         </div>
       </CardHeader>
       <CardContent>
+        {!items.length ? (
+          <p className="text-sm text-slate">
+            No classifications are available yet. Import comments and wait for the hosted pipeline to finish classifying them.
+          </p>
+        ) : null}
         <Table>
           <TableElement>
             <TableHead>

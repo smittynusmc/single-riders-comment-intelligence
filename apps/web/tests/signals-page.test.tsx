@@ -66,4 +66,19 @@ describe("SignalsPage", () => {
     expect(screen.getByText("Export GitHub")).toBeInTheDocument();
     expect(screen.getByText("Audience Priorities Beside The Signal Queue")).toBeInTheDocument();
   });
+
+  it("renders an empty-state message when no signals are available", async () => {
+    const { getSignals } = await import("@/lib/api/signals");
+
+    vi.mocked(getSignals).mockResolvedValueOnce({
+      items: [],
+      meta: { total: 0, limit: 50, offset: 0 },
+      warning: "Signals are temporarily unavailable because the hosted API returned 404 for the signals list endpoint.",
+    });
+
+    render(await SignalsPage());
+
+    expect(screen.getByText(/some data could not be loaded/i)).toBeInTheDocument();
+    expect(screen.getByText(/no signals are available yet/i)).toBeInTheDocument();
+  });
 });
