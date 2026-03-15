@@ -28,6 +28,11 @@ export function ImportHistoryTable({ runs }: { runs: IngestionRun[] }) {
         </div>
       </CardHeader>
       <CardContent>
+        {!runs.length ? (
+          <p className="text-sm text-slate">
+            No imports have been recorded yet. Upload a JSON or CSV file to start the hosted comment pipeline.
+          </p>
+        ) : null}
         <Table>
           <TableElement>
             <TableHead>

@@ -44,4 +44,16 @@ describe("ImportsPage", () => {
     expect(screen.getByText("tiktok json")).toBeInTheDocument();
     expect(screen.getByText(/uploaded by adam@example.com/i)).toBeInTheDocument();
   });
+
+  it("renders an empty-state message when import history is unavailable", async () => {
+    const { getImports } = await import("@/lib/api/imports");
+    vi.mocked(getImports).mockResolvedValueOnce({
+      items: [],
+      meta: { total: 0, limit: 20, offset: 0 },
+    });
+
+    render(await ImportsPage());
+
+    expect(screen.getByText(/no imports have been recorded yet/i)).toBeInTheDocument();
+  });
 });
