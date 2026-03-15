@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { ApiRequestError } from "@/lib/api/client";
-import { getDashboardTrends, getTopSignals } from "@/lib/api/dashboard";
+import { getAudienceInsights, getDashboardSummary, getDashboardTrends, getTopSignals } from "@/lib/api/dashboard";
 
 vi.mock("@/lib/api/client", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api/client")>("@/lib/api/client");
@@ -69,5 +69,47 @@ describe("getDashboardTrends", () => {
     vi.mocked(apiFetch).mockRejectedValueOnce(new ApiRequestError("/dashboard/trends", 404));
 
     await expect(getDashboardTrends()).resolves.toEqual([]);
+  });
+});
+
+describe("getDashboardSummary", () => {
+  it("falls back to an empty summary when dashboard/summary is unavailable", async () => {
+    const { apiFetch } = await import("@/lib/api/client");
+
+    vi.mocked(apiFetch).mockRejectedValueOnce(new ApiRequestError("/dashboard/summary", 404));
+
+    await expect(getDashboardSummary()).resolves.toEqual({
+      total_comments: 0,
+      comments_this_week: 0,
+      needs_review_count: 0,
+      total_signals: 0,
+      earliest_comment_date: null,
+      latest_comment_date: null,
+      months_represented: 0,
+      top_categories: [],
+      top_mvp_areas: [],
+      top_repeated_requests: [],
+      top_safety_concerns: [],
+      top_user_concerns: [],
+      top_confusion_points: [],
+      top_positive_validation: [],
+    });
+  });
+});
+
+describe("getAudienceInsights", () => {
+  it("falls back to empty audience insights when the dashboard audience endpoint is unavailable", async () => {
+    const { apiFetch } = await import("@/lib/api/client");
+
+    vi.mocked(apiFetch).mockRejectedValueOnce(new ApiRequestError("/dashboard/audience-insights", 404));
+
+    await expect(getAudienceInsights()).resolves.toEqual({
+      mvp_priorities: [],
+      user_concerns: [],
+      confusion_points: [],
+      positive_validation: [],
+      story_alignment: [],
+      top_videos: [],
+    });
   });
 });
