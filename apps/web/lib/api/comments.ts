@@ -3,7 +3,9 @@ import type { CommentItem, PaginatedResponse } from "@single-riders/shared-types
 import { ApiRequestError, apiFetch, buildQuery } from "@/lib/api/client";
 import { buildUnavailablePaginatedResponse, type FallbackPaginatedResponse } from "@/lib/api/fallback";
 
-export function getComments(params: Record<string, string | number | boolean | undefined | null>) {
+export function getComments(
+  params: Record<string, string | number | boolean | undefined | null>,
+): Promise<FallbackPaginatedResponse<CommentItem>> {
   const limit = typeof params.limit === "number" ? params.limit : 50;
   const offset = typeof params.offset === "number" ? params.offset : 0;
 

@@ -3,7 +3,9 @@ import type { PaginatedResponse, Signal, SignalDetail, SignalExportResponse } fr
 import { ApiRequestError, apiFetch, buildQuery } from "@/lib/api/client";
 import { buildUnavailablePaginatedResponse, type FallbackPaginatedResponse } from "@/lib/api/fallback";
 
-export function getSignals(params: Record<string, string | number | boolean | undefined | null> = {}) {
+export function getSignals(
+  params: Record<string, string | number | boolean | undefined | null> = {},
+): Promise<FallbackPaginatedResponse<Signal>> {
   const limit = typeof params.limit === "number" ? params.limit : 50;
   const offset = typeof params.offset === "number" ? params.offset : 0;
 

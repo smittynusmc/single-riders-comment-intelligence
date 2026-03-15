@@ -3,7 +3,7 @@ import type { ImportPreview, IngestionRun, PaginatedResponse } from "@single-rid
 import { ApiRequestError, apiFetch, apiUpload, buildQuery } from "@/lib/api/client";
 import { buildUnavailablePaginatedResponse, type FallbackPaginatedResponse } from "@/lib/api/fallback";
 
-export function getImports(params: { limit?: number; offset?: number } = {}) {
+export function getImports(params: { limit?: number; offset?: number } = {}): Promise<FallbackPaginatedResponse<IngestionRun>> {
   const limit = params.limit ?? 50;
   const offset = params.offset ?? 0;
 
