@@ -85,6 +85,12 @@ def run_migrations_online() -> None:
                 )
                 connection.commit()
 
+        # SQLAlchemy 2.x opens an implicit transaction for the preflight reads
+        # above. Commit it before Alembic starts its own migration transaction
+        # so DDL doesn't get rolled back when this connection closes.
+        if connection.in_transaction():
+            connection.commit()
+
         context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
 
         with context.begin_transaction():
