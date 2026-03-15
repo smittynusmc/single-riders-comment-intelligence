@@ -5,7 +5,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import inspect, text
+from sqlalchemy import bindparam, inspect, text
 from sqlalchemy.engine import make_url
 
 from app.api.router import api_router
@@ -49,10 +49,34 @@ def log_database_diagnostics() -> None:
             current_schema = connection.execute(text("SELECT current_schema()")).scalar_one()
             search_path = connection.execute(text("SHOW search_path")).scalar_one()
             inspector = inspect(connection)
-            matching_tables = sum(1 for table_name in EXPECTED_TABLES if inspector.has_table(table_name))
+            inspector_matching_tables = sum(1 for table_name in EXPECTED_TABLES if inspector.has_table(table_name))
+            matching_tables = connection.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM information_schema.tables
+                    WHERE table_name IN :table_names
+                    """
+                ).bindparams(bindparam("table_names", expanding=True)),
+                {"table_names": EXPECTED_TABLES},
+            ).scalar_one()
+            found_tables = connection.execute(
+                text(
+                    """
+                    SELECT table_name
+                    FROM information_schema.tables
+                    WHERE table_name IN :table_names
+                    ORDER BY table_name
+                    """
+                ).bindparams(bindparam("table_names", expanding=True)),
+                {"table_names": EXPECTED_TABLES},
+            ).scalars().all()
+            revision = None
+            if connection.execute(text("SELECT to_regclass('public.alembic_version')")).scalar_one():
+                revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one_or_none()
 
         logger.warning(
-            "DB diagnostics: driver=%s host=%s port=%s database=%s current_database=%s current_schema=%s search_path=%s matching_tables=%s",
+            "DB diagnostics: driver=%s host=%s port=%s database=%s current_database=%s current_schema=%s search_path=%s inspector_matching_tables=%s information_schema_matching_tables=%s revision=%s found_tables=%s",
             url.drivername,
             url.host,
             url.port,
@@ -60,7 +84,10 @@ def log_database_diagnostics() -> None:
             current_database,
             current_schema,
             search_path,
+            inspector_matching_tables,
             matching_tables,
+            revision,
+            found_tables,
         )
     except Exception:
         logger.exception("DB diagnostics failed during startup.")
