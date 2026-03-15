@@ -60,6 +60,17 @@ describe("getTopSignals", () => {
     ]);
     expect(getSignals).toHaveBeenCalledWith({ limit: 5 });
   });
+
+  it("returns an empty state when both top-signals endpoints are unavailable", async () => {
+    const { apiFetch } = await import("@/lib/api/client");
+    const { getSignals } = await import("@/lib/api/signals");
+
+    vi.mocked(apiFetch).mockRejectedValueOnce(new ApiRequestError("/dashboard/top-signals", 404));
+    vi.mocked(getSignals).mockRejectedValueOnce(new ApiRequestError("/signals?limit=5", 404));
+
+    await expect(getTopSignals()).resolves.toEqual([]);
+    expect(getSignals).toHaveBeenCalledWith({ limit: 5 });
+  });
 });
 
 describe("getDashboardTrends", () => {

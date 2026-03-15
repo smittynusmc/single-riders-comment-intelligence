@@ -58,14 +58,22 @@ export async function getTopSignals() {
     return await apiFetch<TopSignalSummary[]>("/dashboard/top-signals");
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 404) {
-      const response = await getSignals({ limit: 5 });
-      return response.items.map((signal) => ({
-        id: signal.id,
-        title: signal.title,
-        mvp_area: signal.mvp_area,
-        evidence_count: signal.evidence_count,
-        priority_score: signal.priority_score,
-      }));
+      try {
+        const response = await getSignals({ limit: 5 });
+        return response.items.map((signal) => ({
+          id: signal.id,
+          title: signal.title,
+          mvp_area: signal.mvp_area,
+          evidence_count: signal.evidence_count,
+          priority_score: signal.priority_score,
+        }));
+      } catch (fallbackError) {
+        if (fallbackError instanceof ApiRequestError && fallbackError.status === 404) {
+          return [];
+        }
+
+        throw fallbackError;
+      }
     }
 
     throw error;
